@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Check-me-up</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <div class="logo">Check-me-up</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html#how-it-works">How it Works</a>
+        <a href="insurance.html">Insurance</a>
+        <a href="contact.html">Contact Us</a>
+        <a href="profile.html" class="btn-secondary">My Profile</a>
+        <a href="logout.html" class="btn-primary">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Profile Container -->
+  <div class="profile-container">
+    <div class="container">
+      <div class="profile-layout">
+        
+        <!-- Left Sidebar -->
+        <aside class="profile-sidebar">
+          <div class="profile-avatar">PA</div>
+          <h2 class="profile-name">Sara Al Mansoori</h2>
+          
+          <div class="profile-info">
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">sara.almansoori@email.com</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              <span class="info-value">+971 50 123 4567</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Gender</span>
+              <span class="info-value">Female</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Date of Birth</span>
+              <span class="info-value">March 15, 1995</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Insurance</span>
+              <span class="insurance-badge">Daman</span>
+            </div>
+          </div>
+          
+          <a href="logout.html" class="btn-secondary btn-logout">Log Out</a>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="profile-main">
+          <h1 class="page-title">My Profile</h1>
+          
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-button active" data-tab="upcoming">Upcoming Appointments</button>
+            <button class="tab-button" data-tab="past">Past Appointments</button>
+            <button class="tab-button" data-tab="info">My Information</button>
+          </div>
+
+          <!-- Tab Content 1: Upcoming Appointments -->
+          <div class="tab-content active" id="upcoming">
+            <div class="appointments-header">
+              <h2>Upcoming Appointments</h2>
+              <p class="appointments-count">You have 2 upcoming appointments</p>
+            </div>
+            
+            <p class="cancel-message" id="cancelMessage"></p>
+            
+            <div class="table-wrapper">
+              <table class="appointments-table">
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Specialty</th>
+                    <th>Branch</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="upcomingAppointments">
+                  <tr>
+                    <td>Dr. James Smith</td>
+                    <td>General Practitioner</td>
+                    <td>Abu Dhabi Main</td>
+                    <td>March 12, 2026</td>
+                    <td>2:00 PM</td>
+                    <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    <td><button class="btn-cancel">Cancel</button></td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Sarah Johnson</td>
+                    <td>Cardiologist</td>
+                    <td>Dubai Healthcare City</td>
+                    <td>March 18, 2026</td>
+                    <td>10:30 AM</td>
+                    <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    <td><button class="btn-cancel">Cancel</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Past Appointments -->
+          <div class="tab-content" id="past">
+            <div class="appointments-header">
+              <h2>Past Appointments</h2>
+              <p class="appointments-count">3 completed appointments</p>
+            </div>
+            
+            <div class="table-wrapper">
+              <table class="appointments-table">
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Specialty</th>
+                    <th>Branch</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="pastAppointments">
+                  <tr>
+                    <td>Dr. Michael Williams</td>
+                    <td>Dermatologist</td>
+                    <td>Sharjah Medical Center</td>
+                    <td>February 28, 2026</td>
+                    <td>3:15 PM</td>
+                    <td><span class="status-badge status-completed">Completed</span></td>
+                    <td><button class="btn-book-again">Book Again</button></td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Emily Chen</td>
+                    <td>Pediatrician</td>
+                    <td>Abu Dhabi Main</td>
+                    <td>February 15, 2026</td>
+                    <td>11:00 AM</td>
+                    <td><span class="status-badge status-completed">Completed</span></td>
+                    <td><button class="btn-book-again">Book Again</button></td>
+                  </tr>
+                  <tr>
+                    <td>Dr. James Smith</td>
+                    <td>General Practitioner</td>
+                    <td>Abu Dhabi Main</td>
+                    <td>January 22, 2026</td>
+                    <td>9:30 AM</td>
+                    <td><span class="status-badge status-completed">Completed</span></td>
+                    <td><button class="btn-book-again">Book Again</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab Content 3: My Information -->
+          <div class="tab-content" id="info">
+            <div class="appointments-header">
+              <h2>My Information</h2>
+              <p class="appointments-count">Your personal details</p>
+            </div>
+            
+            <div class="info-grid">
+              <div class="info-grid-item">
+                <span class="info-grid-label">Full Name</span>
+                <span class="info-grid-value">Sara Al Mansoori</span>
+              </div>
+              
+              <div class="info-grid-item">
+                <span class="info-grid-label">Email Address</span>
+                <span class="info-grid-value">sara.almansoori@email.com</span>
+              </div>
+              
+              <div class="info-grid-item">
+                <span class="info-grid-label">Phone Number</span>
+                <span class="info-grid-value">+971 50 123 4567</span>
+              </div>
+              
+              <div class="info-grid-item">
+                <span class="info-grid-label">Date of Birth</span>
+                <span class="info-grid-value">March 15, 1995</span>
+              </div>
+              
+              <div class="info-grid-item">
+                <span class="info-grid-label">Gender</span>
+                <span class="info-grid-value">Female</span>
+              </div>
+              
+              <div class="info-grid-item">
+                <span class="info-grid-label">Insurance Company</span>
+                <span class="info-grid-value">Daman</span>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <!-- Column 1: Brand -->
+        <div class="footer-column">
+          <h3 class="footer-brand">Check-me-up</h3>
+          <p class="footer-tagline">Your health, booked in minutes.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">📷 Instagram</a>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div class="footer-column">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#how-it-works">How it Works</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="booking.html">Book Now</a></li>
+            <li><a href="symptom-checker.html">Check My Symptoms</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact Info -->
+        <div class="footer-column">
+          <h4>Contact Info</h4>
+          <div class="contact-info">
+            <p class="contact-item">📞 +971 50 000 0000</p>
+            <p class="contact-item">✉️ hello@checkmeup.ae</p>
+            <p class="contact-item">📍 Abu Dhabi, UAE</p>
+            <p class="contact-item">💬 @checkmeup.ae</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copyright">&copy; 2026 Check-me-up</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="index.html" class="back-home-btn" style="position: fixed; left: 1rem; bottom: 1rem; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 999px; background-color: #4A90D9; color: #FFFFFF; font-weight: 600; font-size: 0.9rem; text-decoration: none; box-shadow: 0 8px 24px rgba(74, 144, 217, 0.35);">Back to Main Page</a>
+
+  <script src="../js/back-home.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/profile.js"></script>
+</body>
+</html>

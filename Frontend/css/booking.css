@@ -1,0 +1,562 @@
+/* Navbar Layout */
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Booking Section */
+.booking-section {
+  padding: 3rem 0 5rem;
+  min-height: calc(100vh - 200px);
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 3rem;
+}
+
+/* Progress Bar */
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+  position: relative;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 0.75rem;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background-color: var(--color-border);
+  z-index: 0;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  flex: 1;
+  z-index: 1;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-background);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all 0.3s ease;
+}
+
+.progress-step.active .step-number,
+.progress-step.completed .step-number {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-align: center;
+}
+
+.progress-step.active .step-label {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Booking Form */
+.booking-form {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.form-step {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.form-step.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Step 1: Specialist Grid */
+.specialist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.specialist-card {
+  background-color: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.specialist-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.15);
+  transform: translateY(-4px);
+}
+
+.specialist-card.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+.specialist-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.specialist-label {
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+/* Step 2: Branch & Doctor Selection */
+.branch-selection {
+  margin-bottom: 2.5rem;
+}
+
+.branch-selection label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 0.75rem;
+}
+
+.branch-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--color-text-dark);
+  background-color: var(--color-background);
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.branch-dropdown:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.doctors-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 1.5rem;
+}
+
+.doctor-cards {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.doctor-card {
+  background-color: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 250px;
+}
+
+.doctor-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+}
+
+.doctor-card.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+.doctor-photo {
+  font-size: 3rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+}
+
+.doctor-info {
+  flex: 1;
+}
+
+.doctor-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 0.25rem;
+}
+
+.doctor-specialty {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.doctor-rating {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Step 3: Date & Time Selection */
+.datetime-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.date-selection h3,
+.time-selection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 1rem;
+}
+
+.date-picker {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--color-text-dark);
+  background-color: var(--color-background);
+  cursor: pointer;
+}
+
+.date-picker:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.time-slot {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: 2rem;
+  background-color: var(--color-background);
+  color: var(--color-text-dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.time-slot:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+.time-slot.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Step 4: Confirmation */
+.confirmation-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.confirmation-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-item:last-of-type {
+  margin-bottom: 2rem;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.summary-value {
+  color: var(--color-text-muted);
+}
+
+.confirm-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+}
+
+/* Insurance Coverage Badge Styles */
+.insurance-badge {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-left: 4px solid;
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.insurance-badge:empty {
+  display: none;
+}
+
+.insurance-badge.fade-in-delay-6 {
+  animation-delay: 0.3s;
+}
+
+.badge-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.badge-text {
+  flex: 1;
+}
+
+.insurance-covered {
+  background-color: #D1FAE5;
+  color: #065F46;
+  border-left-color: #10B981;
+}
+
+.insurance-not-covered {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-left-color: #F59E0B;
+}
+
+.insurance-no-coverage {
+  background-color: #F3F4F6;
+  color: #6B7280;
+  border-left-color: #9CA3AF;
+}
+
+/* Booking Actions Container (after successful booking) */
+.booking-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeIn 0.5s ease forwards;
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.booking-actions .btn-primary,
+.booking-actions .btn-secondary {
+  min-width: 180px;
+  text-align: center;
+  padding: 0.875rem 1.5rem;
+}
+
+/* Form Navigation */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.form-navigation button {
+  min-width: 120px;
+}
+
+#next-btn {
+  margin-left: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 48rem) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 0.875rem;
+  }
+
+  .specialist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .time-slots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .time-slot {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .booking-actions {
+    flex-direction: column;
+  }
+
+  .booking-actions .btn-primary,
+  .booking-actions .btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 30rem) {
+  .progress-bar {
+    gap: 0.5rem;
+  }
+
+  .step-label {
+    display: none;
+  }
+
+  .specialist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-cards {
+    flex-direction: column;
+  }
+
+  .doctor-card {
+    min-width: 100%;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .doctor-photo {
+    margin: 0 auto;
+  }
+
+  .time-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .confirmation-card {
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .summary-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .insurance-badge {
+    width: 100%;
+    font-size: 0.8125rem;
+    padding: 0.875rem;
+  }
+
+  .form-navigation {
+    flex-direction: column;
+  }
+
+  .form-navigation button {
+    width: 100%;
+  }
+
+  #next-btn {
+    margin-left: 0;
+  }
+}

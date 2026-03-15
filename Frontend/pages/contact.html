@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - Check-me-up</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/contact.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <div class="logo">Check-me-up</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html#how-it-works">How it Works</a>
+        <a href="insurance.html">Insurance</a>
+        <a href="contact.html">Contact Us</a>
+        <a href="login.html" class="btn-primary">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1 class="page-title">Contact Us</h1>
+      <p class="page-subtitle">We'd love to hear from you. Reach out anytime.</p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="contact-layout">
+        
+        <!-- Left Column: Contact Form -->
+        <div class="contact-form-wrapper">
+          <h2 class="form-heading">Send Us a Message</h2>
+          <div id="contactForm" class="contact-form">
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <input type="text" id="fullName" placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <select id="subject">
+                <option value="">Select a subject</option>
+                <option value="general">General Inquiry</option>
+                <option value="booking">Booking Issue</option>
+                <option value="technical">Technical Support</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" rows="6" placeholder="Tell us how we can help you..."></textarea>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;">
+              Please fill in all fields.
+            </div>
+
+            <button id="sendButton" class="btn-primary">Send Message</button>
+          </div>
+
+          <!-- Success Message (hidden by default) -->
+          <div id="successMessage" class="success-message" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h3>Thanks for reaching out!</h3>
+            <p>We'll get back to you within 24 hours. 💙</p>
+          </div>
+        </div>
+
+        <!-- Right Column: Contact Info -->
+        <div class="contact-info-wrapper">
+          <h2 class="info-heading">Get in Touch</h2>
+          
+          <div class="info-card">
+            <div class="info-icon">📞</div>
+            <div class="info-details">
+              <div class="info-label">Phone</div>
+              <div class="info-value">+971 50 000 0000</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📧</div>
+            <div class="info-details">
+              <div class="info-label">Email</div>
+              <div class="info-value">hello@checkmeup.ae</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📍</div>
+            <div class="info-details">
+              <div class="info-label">Location</div>
+              <div class="info-value">Abu Dhabi, UAE</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-icon">📸</div>
+            <div class="info-details">
+              <div class="info-label">Instagram</div>
+              <div class="info-value">@checkmeup.ae</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Map Placeholder -->
+      <div class="map-placeholder">
+        <p>Map coming soon</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <!-- Column 1: Brand -->
+        <div class="footer-column">
+          <h3 class="footer-brand">Check-me-up</h3>
+          <p class="footer-tagline">Your health, booked in minutes.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/checkmeup.ae" target="_blank" class="social-link">📸 Instagram</a>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#how-it-works">How it Works</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="booking.html">Book Now</a></li>
+            <li><a href="symptom-checker.html">Check My Symptoms</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact Info -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Contact Info</h4>
+          <ul class="footer-contact">
+            <li>📞 +971 50 000 0000</li>
+            <li>📧 hello@checkmeup.ae</li>
+            <li>📍 Abu Dhabi, UAE</li>
+            <li>📸 @checkmeup.ae</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="footer-divider"></div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="footer-copyright">&copy; 2026 Check-me-up</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Contact form validation and submission with real API
+    const API_BASE = 'http://localhost/check-me-up/backend/api';
+    
+    document.getElementById('sendButton').addEventListener('click', function() {
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const subject = document.getElementById('subject').value;
+      const message = document.getElementById('message').value.trim();
+      
+      const errorMessage = document.getElementById('errorMessage');
+      const sendButton = document.getElementById('sendButton');
+      
+      // Validate all fields are filled
+      if (!fullName || !email || !subject || !message) {
+        errorMessage.textContent = 'Please fill in all fields.';
+        errorMessage.style.display = 'block';
+        errorMessage.style.color = '#e74c3c';
+        return;
+      }
+      
+      // Hide error message
+      errorMessage.style.display = 'none';
+      
+      // Show loading state
+      sendButton.textContent = 'Sending...';
+      sendButton.disabled = true;
+      sendButton.style.opacity = '0.7';
+      sendButton.style.cursor = 'not-allowed';
+      
+      // Send data to API
+      fetch(`${API_BASE}/contact.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email,
+          subject: subject,
+          message: message
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.success) {
+          // Hide form and show success message with API response
+          document.getElementById('contactForm').style.display = 'none';
+          const successMessage = document.getElementById('successMessage');
+          successMessage.style.display = 'block';
+          successMessage.querySelector('p').textContent = result.message + ' 💙';
+        } else {
+          // Show error message from API
+          errorMessage.textContent = result.message;
+          errorMessage.style.display = 'block';
+          errorMessage.style.color = '#e74c3c';
+          
+          // Re-enable button
+          sendButton.textContent = 'Send Message';
+          sendButton.disabled = false;
+          sendButton.style.opacity = '1';
+          sendButton.style.cursor = 'pointer';
+        }
+      })
+      .catch(error => {
+        console.error('Error sending message:', error);
+        errorMessage.textContent = 'Could not send your message. Please try again.';
+        errorMessage.style.display = 'block';
+        errorMessage.style.color = '#e74c3c';
+        
+        // Re-enable button
+        sendButton.textContent = 'Send Message';
+        sendButton.disabled = false;
+        sendButton.style.opacity = '1';
+        sendButton.style.cursor = 'pointer';
+      });
+    });
+
+    // Hide error message when user starts typing
+    const inputs = document.querySelectorAll('#contactForm input, #contactForm select, #contactForm textarea');
+    inputs.forEach(input => {
+      input.addEventListener('input', function() {
+        document.getElementById('errorMessage').style.display = 'none';
+      });
+    });
+  </script>
+
+  <a href="index.html" class="back-home-btn" style="position: fixed; left: 1rem; bottom: 1rem; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 999px; background-color: #4A90D9; color: #FFFFFF; font-weight: 600; font-size: 0.9rem; text-decoration: none; box-shadow: 0 8px 24px rgba(74, 144, 217, 0.35);">Back to Main Page</a>
+
+  <script src="../js/back-home.js"></script>
+  <script src="../js/navbar.js"></script>
+</body>
+</html>

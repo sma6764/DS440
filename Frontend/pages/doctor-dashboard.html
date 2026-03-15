@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard - Check-me-up</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/doctor-dashboard.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="doctor-profile">
+        <div class="doctor-photo">👨‍⚕️</div>
+        <h3 class="doctor-name">Dr. James Smith</h3>
+        <p class="doctor-specialty">General Practitioner</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-section="overview">Overview</a>
+        <a href="#" class="nav-link" data-section="appointments">My Appointments</a>
+        <a href="#" class="nav-link" data-section="patients">My Patients</a>
+        <a href="#" class="nav-link" data-section="schedule">Schedule & Availability</a>
+        <a href="profile.html" class="nav-link">My Profile</a>
+        <a href="logout.html" class="nav-link logout">Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="container-fluid">
+        
+        <!-- Overview Section -->
+        <section class="content-section active" id="overview">
+          <h1 class="section-title">Overview</h1>
+          
+          <div class="stats-grid">
+            <div class="card stat-card">
+              <h2 class="stat-number" id="doctor-stat-today">12</h2>
+              <p class="stat-label">Today's Appointments</p>
+            </div>
+            <div class="card stat-card">
+              <h2 class="stat-number" id="doctor-stat-patients">348</h2>
+              <p class="stat-label">Total Patients</p>
+            </div>
+            <div class="card stat-card">
+              <h2 class="stat-number" id="doctor-stat-pending">5</h2>
+              <p class="stat-label">Pending Confirmations</p>
+            </div>
+          </div>
+
+          <div class="card quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-buttons">
+              <button class="btn-primary">View Today's Schedule</button>
+              <button class="btn-secondary">Update Availability</button>
+              <button class="btn-secondary">View Recent Patients</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Appointments Section -->
+        <section class="content-section" id="appointments">
+          <h1 class="section-title">My Appointments</h1>
+          
+          <div class="card">
+            <div class="table-container">
+              <table class="appointments-table">
+                <thead>
+                  <tr>
+                    <th>Patient Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Specialist Type</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="doctor-appointments-body">
+                  <tr>
+                    <td>Sarah Johnson</td>
+                    <td>March 7, 2026</td>
+                    <td>9:00 AM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Michael Chen</td>
+                    <td>March 7, 2026</td>
+                    <td>10:30 AM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td>Emily Rodriguez</td>
+                    <td>March 7, 2026</td>
+                    <td>2:00 PM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>David Park</td>
+                    <td>March 8, 2026</td>
+                    <td>9:30 AM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Jessica Martinez</td>
+                    <td>March 8, 2026</td>
+                    <td>11:00 AM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-cancelled">Cancelled</span></td>
+                  </tr>
+                  <tr>
+                    <td>Robert Thompson</td>
+                    <td>March 8, 2026</td>
+                    <td>3:00 PM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td>Amanda White</td>
+                    <td>March 9, 2026</td>
+                    <td>10:00 AM</td>
+                    <td>General Practitioner</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Patients Section -->
+        <section class="content-section" id="patients">
+          <h1 class="section-title">My Patients</h1>
+          
+          <div class="patients-grid" id="doctor-patients-grid">
+            <div class="card patient-card">
+              <div class="patient-avatar">👨</div>
+              <h4 class="patient-name">John Anderson</h4>
+              <p class="patient-info">Age: 45</p>
+              <p class="patient-info">Last Visit: Feb 28, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+            <div class="card patient-card">
+              <div class="patient-avatar">👩</div>
+              <h4 class="patient-name">Sarah Johnson</h4>
+              <p class="patient-info">Age: 32</p>
+              <p class="patient-info">Last Visit: March 5, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+            <div class="card patient-card">
+              <div class="patient-avatar">👨</div>
+              <h4 class="patient-name">Michael Chen</h4>
+              <p class="patient-info">Age: 28</p>
+              <p class="patient-info">Last Visit: March 1, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+            <div class="card patient-card">
+              <div class="patient-avatar">👩</div>
+              <h4 class="patient-name">Emily Rodriguez</h4>
+              <p class="patient-info">Age: 38</p>
+              <p class="patient-info">Last Visit: Feb 25, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+            <div class="card patient-card">
+              <div class="patient-avatar">👨</div>
+              <h4 class="patient-name">David Park</h4>
+              <p class="patient-info">Age: 52</p>
+              <p class="patient-info">Last Visit: March 3, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+            <div class="card patient-card">
+              <div class="patient-avatar">👩</div>
+              <h4 class="patient-name">Jessica Martinez</h4>
+              <p class="patient-info">Age: 41</p>
+              <p class="patient-info">Last Visit: Feb 20, 2026</p>
+              <button class="btn-secondary view-profile-btn">View Profile</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Schedule & Availability Section -->
+        <section class="content-section" id="schedule">
+          <h1 class="section-title">Schedule & Availability</h1>
+          
+          <div class="card">
+            <p class="schedule-subtitle">Click on time slots to toggle availability</p>
+            <div class="schedule-grid">
+              <!-- Monday -->
+              <div class="day-column">
+                <h4 class="day-header">Monday</h4>
+                <button class="time-slot available" data-day="mon" data-time="09:00">9:00 AM</button>
+                <button class="time-slot available" data-day="mon" data-time="10:00">10:00 AM</button>
+                <button class="time-slot available" data-day="mon" data-time="11:00">11:00 AM</button>
+                <button class="time-slot blocked" data-day="mon" data-time="12:00">12:00 PM</button>
+                <button class="time-slot available" data-day="mon" data-time="13:00">1:00 PM</button>
+                <button class="time-slot available" data-day="mon" data-time="14:00">2:00 PM</button>
+                <button class="time-slot available" data-day="mon" data-time="15:00">3:00 PM</button>
+              </div>
+
+              <!-- Tuesday -->
+              <div class="day-column">
+                <h4 class="day-header">Tuesday</h4>
+                <button class="time-slot available" data-day="tue" data-time="09:00">9:00 AM</button>
+                <button class="time-slot available" data-day="tue" data-time="10:00">10:00 AM</button>
+                <button class="time-slot blocked" data-day="tue" data-time="11:00">11:00 AM</button>
+                <button class="time-slot blocked" data-day="tue" data-time="12:00">12:00 PM</button>
+                <button class="time-slot available" data-day="tue" data-time="13:00">1:00 PM</button>
+                <button class="time-slot available" data-day="tue" data-time="14:00">2:00 PM</button>
+                <button class="time-slot available" data-day="tue" data-time="15:00">3:00 PM</button>
+              </div>
+
+              <!-- Wednesday -->
+              <div class="day-column">
+                <h4 class="day-header">Wednesday</h4>
+                <button class="time-slot available" data-day="wed" data-time="09:00">9:00 AM</button>
+                <button class="time-slot available" data-day="wed" data-time="10:00">10:00 AM</button>
+                <button class="time-slot available" data-day="wed" data-time="11:00">11:00 AM</button>
+                <button class="time-slot blocked" data-day="wed" data-time="12:00">12:00 PM</button>
+                <button class="time-slot available" data-day="wed" data-time="13:00">1:00 PM</button>
+                <button class="time-slot available" data-day="wed" data-time="14:00">2:00 PM</button>
+                <button class="time-slot blocked" data-day="wed" data-time="15:00">3:00 PM</button>
+              </div>
+
+              <!-- Thursday -->
+              <div class="day-column">
+                <h4 class="day-header">Thursday</h4>
+                <button class="time-slot available" data-day="thu" data-time="09:00">9:00 AM</button>
+                <button class="time-slot available" data-day="thu" data-time="10:00">10:00 AM</button>
+                <button class="time-slot available" data-day="thu" data-time="11:00">11:00 AM</button>
+                <button class="time-slot blocked" data-day="thu" data-time="12:00">12:00 PM</button>
+                <button class="time-slot available" data-day="thu" data-time="13:00">1:00 PM</button>
+                <button class="time-slot available" data-day="thu" data-time="14:00">2:00 PM</button>
+                <button class="time-slot available" data-day="thu" data-time="15:00">3:00 PM</button>
+              </div>
+
+              <!-- Friday -->
+              <div class="day-column">
+                <h4 class="day-header">Friday</h4>
+                <button class="time-slot available" data-day="fri" data-time="09:00">9:00 AM</button>
+                <button class="time-slot available" data-day="fri" data-time="10:00">10:00 AM</button>
+                <button class="time-slot available" data-day="fri" data-time="11:00">11:00 AM</button>
+                <button class="time-slot blocked" data-day="fri" data-time="12:00">12:00 PM</button>
+                <button class="time-slot blocked" data-day="fri" data-time="13:00">1:00 PM</button>
+                <button class="time-slot blocked" data-day="fri" data-time="14:00">2:00 PM</button>
+                <button class="time-slot blocked" data-day="fri" data-time="15:00">3:00 PM</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <!-- Column 1: Brand -->
+        <div class="footer-column">
+          <h3 class="footer-brand">Check-me-up</h3>
+          <p class="footer-tagline">Your health, booked in minutes.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/checkmeup.ae" target="_blank" class="social-link">📸 Instagram</a>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#how-it-works">How it Works</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="booking.html">Book Now</a></li>
+            <li><a href="symptom-checker.html">Check My Symptoms</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact Info -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Contact Info</h4>
+          <ul class="footer-contact">
+            <li>📞 +971 50 000 0000</li>
+            <li>📧 hello@checkmeup.ae</li>
+            <li>📍 Abu Dhabi, UAE</li>
+            <li>📸 @checkmeup.ae</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="footer-divider"></div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="footer-copyright">&copy; 2026 Check-me-up</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="index.html" class="back-home-btn" style="position: fixed; left: 1rem; bottom: 1rem; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 999px; background-color: #4A90D9; color: #FFFFFF; font-weight: 600; font-size: 0.9rem; text-decoration: none; box-shadow: 0 8px 24px rgba(74, 144, 217, 0.35);">Back to Main Page</a>
+
+  <script src="../js/back-home.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/dashboard.js?v=20260315"></script>
+</body>
+</html>

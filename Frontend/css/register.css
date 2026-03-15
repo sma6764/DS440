@@ -1,0 +1,290 @@
+/* Registration Page Styles */
+
+/* Page Layout */
+body {
+  background-color: #EAF4FB;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Registration Container */
+.register-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 80px - 300px); /* viewport - navbar - footer */
+}
+
+/* Registration Card */
+.register-card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 560px;
+}
+
+/* Header */
+.register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-name {
+  color: var(--color-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.register-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+/* Form */
+.register-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Full Width Fields */
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #9CA3AF;
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group select option {
+  padding: 0.5rem;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  width: 100%;
+  height: 4px;
+  background-color: #E5E7EB;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  width: 0%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-bar.weak {
+  width: 33%;
+  background-color: #EF4444;
+}
+
+.strength-bar.medium {
+  width: 66%;
+  background-color: #F59E0B;
+}
+
+.strength-bar.strong {
+  width: 100%;
+  background-color: #34D399;
+}
+
+.strength-text {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.strength-text.weak {
+  color: #EF4444;
+}
+
+.strength-text.medium {
+  color: #F59E0B;
+}
+
+.strength-text.strong {
+  color: #34D399;
+}
+
+/* Password Match Indicator */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-match-indicator {
+  position: absolute;
+  right: 1rem;
+  font-size: 1.25rem;
+  user-select: none;
+}
+
+.password-match-indicator.match {
+  color: #34D399;
+}
+
+.password-match-indicator.no-match {
+  color: #EF4444;
+}
+
+/* Checkbox */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  cursor: pointer;
+  width: auto;
+}
+
+.terms-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.terms-link:hover {
+  color: #3A7BC8;
+  text-decoration: underline;
+}
+
+/* Error Message */
+.error-message {
+  grid-column: 1 / -1;
+  color: #EF4444;
+  font-size: 0.875rem;
+  text-align: center;
+  margin: 0;
+  min-height: 1.25rem;
+  font-weight: 500;
+}
+
+/* Register Button */
+.btn-register {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Login Prompt */
+.login-prompt {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 1.5rem 0 0;
+}
+
+.login-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: #3A7BC8;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-container {
+    padding: 1rem;
+    min-height: calc(100vh - 70px - 250px);
+  }
+
+  .register-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .brand-name {
+    font-size: 1.75rem;
+  }
+
+  .register-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .register-card {
+    max-width: none;
+    margin: 1rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .register-form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group {
+    grid-column: 1 / -1;
+  }
+
+  .password-strength {
+    width: 100%;
+  }
+}

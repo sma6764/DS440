@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Check-me-up</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/admin-dashboard.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="admin-profile">
+        <div class="admin-avatar">👤</div>
+        <h3 class="admin-title">Admin Panel</h3>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-section="overview">Overview</a>
+        <a href="#" class="nav-link" data-section="doctors">Manage Doctors</a>
+        <a href="#" class="nav-link" data-section="patients">Manage Patients</a>
+        <a href="#" class="nav-link" data-section="branches">Manage Branches</a>
+        <a href="#" class="nav-link" data-section="appointments">Appointments</a>
+        <a href="#" class="nav-link" data-section="reports">Reports</a>
+        <a href="profile.html" class="nav-link">My Profile</a>
+        <a href="logout.html" class="nav-link logout">Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="container-fluid">
+        
+        <!-- Overview Section -->
+        <section class="content-section active" id="overview">
+          <h1 class="section-title">Overview</h1>
+          
+          <div class="stats-grid">
+            <div class="card stat-card">
+              <div class="stat-icon">👨‍⚕️</div>
+              <h2 class="stat-number">48</h2>
+              <p class="stat-label">Total Doctors</p>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon">👥</div>
+              <h2 class="stat-number">1,247</h2>
+              <p class="stat-label">Total Patients</p>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon">📅</div>
+              <h2 class="stat-number">89</h2>
+              <p class="stat-label">Today's Appointments</p>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon">🏥</div>
+              <h2 class="stat-number">4</h2>
+              <p class="stat-label">Total Branches</p>
+            </div>
+          </div>
+
+          <div class="card recent-activity">
+            <h3>Recent Activity</h3>
+            <div class="activity-list" id="admin-activity-list">
+              <div class="activity-item">
+                <span class="activity-time">2 min ago</span>
+                <span class="activity-text">New patient registered: Sarah Johnson</span>
+              </div>
+              <div class="activity-item">
+                <span class="activity-time">15 min ago</span>
+                <span class="activity-text">Dr. Michael Williams updated availability</span>
+              </div>
+              <div class="activity-item">
+                <span class="activity-time">1 hour ago</span>
+                <span class="activity-text">New appointment booked at Downtown Medical Center</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manage Doctors Section -->
+        <section class="content-section" id="doctors">
+          <h1 class="section-title">Manage Doctors</h1>
+          
+          <div class="card">
+            <div class="table-header">
+              <button class="btn-primary">Add New Doctor</button>
+            </div>
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Doctor Name</th>
+                    <th>Specialty</th>
+                    <th>Branch</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-doctors-body">
+                  <tr>
+                    <td>Dr. James Smith</td>
+                    <td>General Practitioner</td>
+                    <td>Downtown Medical Center</td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                      <button class="action-btn btn-edit">Edit</button>
+                      <button class="action-btn btn-deactivate">Deactivate</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Sarah Johnson</td>
+                    <td>Cardiologist</td>
+                    <td>Northside Clinic</td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                      <button class="action-btn btn-edit">Edit</button>
+                      <button class="action-btn btn-deactivate">Deactivate</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Michael Williams</td>
+                    <td>Dermatologist</td>
+                    <td>West End Health Hub</td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                      <button class="action-btn btn-edit">Edit</button>
+                      <button class="action-btn btn-deactivate">Deactivate</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Emily Chen</td>
+                    <td>Pediatrician</td>
+                    <td>Eastside Family Care</td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                      <button class="action-btn btn-edit">Edit</button>
+                      <button class="action-btn btn-deactivate">Deactivate</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Dr. Robert Thompson</td>
+                    <td>Neurologist</td>
+                    <td>Downtown Medical Center</td>
+                    <td><span class="badge badge-inactive">Inactive</span></td>
+                    <td>
+                      <button class="action-btn btn-edit">Edit</button>
+                      <button class="action-btn btn-deactivate">Activate</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manage Patients Section -->
+        <section class="content-section" id="patients">
+          <h1 class="section-title">Manage Patients</h1>
+          
+          <div class="card">
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Patient Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Registered Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-patients-body">
+                  <tr>
+                    <td>John Anderson</td>
+                    <td>john.anderson@email.com</td>
+                    <td>(555) 123-4567</td>
+                    <td>Jan 15, 2025</td>
+                    <td>
+                      <button class="action-btn btn-edit">View</button>
+                      <button class="action-btn btn-delete">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Sarah Johnson</td>
+                    <td>sarah.johnson@email.com</td>
+                    <td>(555) 234-5678</td>
+                    <td>Feb 3, 2025</td>
+                    <td>
+                      <button class="action-btn btn-edit">View</button>
+                      <button class="action-btn btn-delete">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Michael Chen</td>
+                    <td>michael.chen@email.com</td>
+                    <td>(555) 345-6789</td>
+                    <td>Feb 20, 2025</td>
+                    <td>
+                      <button class="action-btn btn-edit">View</button>
+                      <button class="action-btn btn-delete">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Emily Rodriguez</td>
+                    <td>emily.rodriguez@email.com</td>
+                    <td>(555) 456-7890</td>
+                    <td>March 1, 2026</td>
+                    <td>
+                      <button class="action-btn btn-edit">View</button>
+                      <button class="action-btn btn-delete">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>David Park</td>
+                    <td>david.park@email.com</td>
+                    <td>(555) 567-8901</td>
+                    <td>March 5, 2026</td>
+                    <td>
+                      <button class="action-btn btn-edit">View</button>
+                      <button class="action-btn btn-delete">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Manage Branches Section -->
+        <section class="content-section" id="branches">
+          <h1 class="section-title">Manage Branches</h1>
+          
+          <div class="branch-header">
+            <button class="btn-primary">Add New Branch</button>
+          </div>
+
+          <div class="branches-grid" id="admin-branches-grid">
+            <div class="card branch-card">
+              <h4 class="branch-name">Downtown Medical Center</h4>
+              <p class="branch-address">123 Main Street, Suite 100<br>Downtown, CA 90001</p>
+              <div class="branch-stats">
+                <div class="branch-stat">
+                  <span class="stat-value">12</span>
+                  <span class="stat-text">Doctors</span>
+                </div>
+                <div class="branch-stat">
+                  <span class="stat-value">245</span>
+                  <span class="stat-text">Appointments/Month</span>
+                </div>
+              </div>
+              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
+            </div>
+
+            <div class="card branch-card">
+              <h4 class="branch-name">Northside Clinic</h4>
+              <p class="branch-address">456 North Avenue, Building B<br>Northside, CA 90012</p>
+              <div class="branch-stats">
+                <div class="branch-stat">
+                  <span class="stat-value">10</span>
+                  <span class="stat-text">Doctors</span>
+                </div>
+                <div class="branch-stat">
+                  <span class="stat-value">198</span>
+                  <span class="stat-text">Appointments/Month</span>
+                </div>
+              </div>
+              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
+            </div>
+
+            <div class="card branch-card">
+              <h4 class="branch-name">West End Health Hub</h4>
+              <p class="branch-address">789 West Boulevard<br>West End, CA 90023</p>
+              <div class="branch-stats">
+                <div class="branch-stat">
+                  <span class="stat-value">14</span>
+                  <span class="stat-text">Doctors</span>
+                </div>
+                <div class="branch-stat">
+                  <span class="stat-value">312</span>
+                  <span class="stat-text">Appointments/Month</span>
+                </div>
+              </div>
+              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
+            </div>
+
+            <div class="card branch-card">
+              <h4 class="branch-name">Eastside Family Care</h4>
+              <p class="branch-address">321 East Street, Floor 2<br>Eastside, CA 90034</p>
+              <div class="branch-stats">
+                <div class="branch-stat">
+                  <span class="stat-value">12</span>
+                  <span class="stat-text">Doctors</span>
+                </div>
+                <div class="branch-stat">
+                  <span class="stat-value">267</span>
+                  <span class="stat-text">Appointments/Month</span>
+                </div>
+              </div>
+              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Appointments Section -->
+        <section class="content-section" id="appointments">
+          <h1 class="section-title">All Appointments</h1>
+          
+          <div class="card">
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Patient Name</th>
+                    <th>Doctor</th>
+                    <th>Branch</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-appointments-body">
+                  <tr>
+                    <td>Sarah Johnson</td>
+                    <td>Dr. James Smith</td>
+                    <td>Downtown Medical Center</td>
+                    <td>March 7, 2026</td>
+                    <td>9:00 AM</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Michael Chen</td>
+                    <td>Dr. Sarah Johnson</td>
+                    <td>Northside Clinic</td>
+                    <td>March 7, 2026</td>
+                    <td>10:30 AM</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td>Emily Rodriguez</td>
+                    <td>Dr. Michael Williams</td>
+                    <td>West End Health Hub</td>
+                    <td>March 7, 2026</td>
+                    <td>2:00 PM</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>David Park</td>
+                    <td>Dr. Emily Chen</td>
+                    <td>Eastside Family Care</td>
+                    <td>March 8, 2026</td>
+                    <td>9:30 AM</td>
+                    <td><span class="badge badge-confirmed">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Jessica Martinez</td>
+                    <td>Dr. James Smith</td>
+                    <td>Downtown Medical Center</td>
+                    <td>March 8, 2026</td>
+                    <td>11:00 AM</td>
+                    <td><span class="badge badge-cancelled">Cancelled</span></td>
+                  </tr>
+                  <tr>
+                    <td>Robert Thompson</td>
+                    <td>Dr. Sarah Johnson</td>
+                    <td>Northside Clinic</td>
+                    <td>March 8, 2026</td>
+                    <td>3:00 PM</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section class="content-section" id="reports">
+          <h1 class="section-title">Reports</h1>
+          
+          <div class="reports-grid">
+            <div class="card report-card">
+              <div class="report-icon">📊</div>
+              <h3>Monthly Appointments Report</h3>
+              <p class="report-description">
+                Comprehensive breakdown of all appointments scheduled, completed, and cancelled for the current month.
+              </p>
+              <button class="btn-secondary download-btn">Download CSV</button>
+            </div>
+
+            <div class="card report-card">
+              <div class="report-icon">📈</div>
+              <h3>Doctor Performance Report</h3>
+              <p class="report-description">
+                Detailed analytics on doctor availability, patient ratings, appointment completion rates, and overall performance.
+              </p>
+              <button class="btn-secondary download-btn">Download CSV</button>
+            </div>
+
+            <div class="card report-card">
+              <div class="report-icon">💰</div>
+              <h3>Revenue Report</h3>
+              <p class="report-description">
+                Financial summary including total revenue, payments collected, outstanding balances, and insurance claims.
+              </p>
+              <button class="btn-secondary download-btn">Download CSV</button>
+            </div>
+
+            <div class="card report-card">
+              <div class="report-icon">👥</div>
+              <h3>Patient Demographics Report</h3>
+              <p class="report-description">
+                Statistical analysis of patient demographics, age groups, specialty preferences, and appointment patterns.
+              </p>
+              <button class="btn-secondary download-btn">Download CSV</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <!-- Column 1: Brand -->
+        <div class="footer-column">
+          <h3 class="footer-brand">Check-me-up</h3>
+          <p class="footer-tagline">Your health, booked in minutes.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/checkmeup.ae" target="_blank" class="social-link">📸 Instagram</a>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Links -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#how-it-works">How it Works</a></li>
+            <li><a href="insurance.html">Insurance</a></li>
+            <li><a href="booking.html">Book Now</a></li>
+            <li><a href="symptom-checker.html">Check My Symptoms</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Contact Info -->
+        <div class="footer-column">
+          <h4 class="footer-heading">Contact Info</h4>
+          <ul class="footer-contact">
+            <li>📞 +971 50 000 0000</li>
+            <li>📧 hello@checkmeup.ae</li>
+            <li>📍 Abu Dhabi, UAE</li>
+            <li>📸 @checkmeup.ae</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="footer-divider"></div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="footer-copyright">&copy; 2026 Check-me-up</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="index.html" class="back-home-btn" style="position: fixed; left: 1rem; bottom: 1rem; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 999px; background-color: #4A90D9; color: #FFFFFF; font-weight: 600; font-size: 0.9rem; text-decoration: none; box-shadow: 0 8px 24px rgba(74, 144, 217, 0.35);">Back to Main Page</a>
+
+  <script src="../js/back-home.js"></script>
+  <script src="../js/navbar.js"></script>
+  <script src="../js/dashboard.js?v=20260315"></script>
+</body>
+</html>
