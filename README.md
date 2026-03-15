@@ -1,35 +1,50 @@
-# Project Title
+# Check-me-up 🏥
+An AI-powered healthcare appointment booking platform built as a capstone project for DS440 (Group 12).
+ 
+---
+ 
+## What is Check-me-up?
+ 
+Check-me-up is a web-based platform that makes booking a medical appointment actually simple. Instead of calling during office hours or navigating a confusing system, patients can describe their symptoms in plain language, get an AI-powered specialist recommendation, and book an appointment online — all in one place.
+ 
+The platform supports multiple clinic branches, shows insurance coverage and pricing before booking, and gives doctors and admins their own dashboards to manage everything on their end.
+ 
+---
+ 
+## Features
+ 
+- **AI Symptom Checker** — patients describe symptoms and get a specialist recommendation before booking
+- **Online Appointment Booking** — full end-to-end booking with no phone calls required
+- **Insurance Transparency** — patients see coverage percentage and estimated cost before confirming
+- **Multi-Branch Support** — works across multiple clinic locations
+- **Doctor Dashboard** — doctors can view and manage their appointments and patient notes
+- **Admin Panel** — admins manage doctors, branches, and bookings for their assigned branch
+- **Contact Form** — patients can send messages directly through the platform
+- **Email Notifications** — confirmation and cancellation emails sent automatically
+ 
+---
 
-A brief description of your project, explaining what it does and its purpose. This project is aimed at providing users with a seamless experience in accessing and using the features of the website.
+## Database Tables
+ 
+| Table | Description |
+|-------|-------------|
+| `users` | Stores all users — patients, doctors, and admins (role-based) |
+| `doctors` | Doctor profiles linked to users, specialists, and branches |
+| `specialists` | Medical specialties (e.g. Cardiology, Dermatology) |
+| `branches` | Clinic branch locations |
+| `appointments` | Booking records linking patients, doctors, and branches |
+| `insurance_coverage` | Coverage percentages per insurance company per specialist |
+| `contact_messages` | Messages submitted through the contact form |
+ 
+---
 
-## Getting Started
-
-### Prerequisites
-Make sure you have the following installed on your machine:
-- List any prerequisites here (e.g., Node.js, Python, etc.)
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/sma6764/DS440.git
-   cd DS440
-   ```
-2. Install dependencies:
-   ```bash
-   # If using npm
-   npm install
-   
-   # If using yarn
-   yarn install
-   ```
-
-3. Start the server:
-   ```bash
-   npm start
-   ```
-
-### Usage
-Provide any examples or usage instructions here.
-
-## Contributing
-If you would like to contribute to this project, please fork the repository and make a pull request.
+## Team
+ 
+| Name | Role |
+|------|------|
+| Sara Almansoori | Frontend Development, UI Design, Documentation |
+| Suheil Alzaabi | Backend Development, Database, API Integration |
+ 
+DS440 — Capstone Project | Group 12
+ 
+---
