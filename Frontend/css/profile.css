@@ -1,413 +1,265 @@
-/* Profile Page Styles */
-
-/* Profile Container */
 .profile-container {
-  background-color: #F9FAFB;
-  padding: 3rem 0;
-  min-height: calc(100vh - 80px - 300px);
+  background: var(--color-bg);
+  padding: 92px 0 100px;
 }
 
-/* Profile Layout */
 .profile-layout {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.2rem;
+  align-items: start;
 }
 
-/* Left Sidebar */
 .profile-sidebar {
-  width: 280px;
-  flex-shrink: 0;
-  background-color: white;
-  border-radius: 1rem;
-  padding: 2rem 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   position: sticky;
-  top: 100px;
-  opacity: 0;
-  animation: fadeInUp 0.6s ease forwards;
+  top: 84px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Profile Avatar */
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
-  background-color: var(--color-primary);
-  color: white;
+  margin: 0 auto 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 auto 1rem;
+  color: var(--color-text);
+  border: 3px solid transparent;
+  background: linear-gradient(var(--color-bg-elevated), var(--color-bg-elevated)) padding-box,
+    var(--color-primary-gradient) border-box;
 }
 
 .profile-name {
   text-align: center;
-  font-size: 1.25rem;
-  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-/* Profile Info */
 .profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  margin-bottom: 2rem;
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
 }
 
 .info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: grid;
+  gap: 0.2rem;
 }
 
 .info-label {
-  font-size: 0.75rem;
   color: var(--color-text-muted);
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .info-value {
-  font-size: 0.875rem;
-  color: var(--color-text);
-  font-weight: 500;
+  color: var(--color-text-secondary);
+  font-size: 0.93rem;
 }
 
-/* Insurance Badge */
 .insurance-badge {
-  display: inline-block;
-  background-color: var(--color-primary);
-  color: white;
-  padding: 0.375rem 0.875rem;
-  border-radius: 50px;
-  font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
   font-weight: 600;
+  color: #ffffff;
+  background: var(--color-primary-gradient);
 }
 
-/* Logout Button */
 .btn-logout {
   width: 100%;
-  padding: 0.875rem;
-  text-align: center;
-  text-decoration: none;
-  display: block;
-  margin-top: 1.5rem;
 }
 
-/* Main Content Area */
 .profile-main {
-  flex: 1;
-  background-color: white;
-  border-radius: 1rem;
-  padding: 2.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem;
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-/* Tabs */
 .tabs {
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid #E5E7EB;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
 }
 
 .tab-button {
-  background: none;
-  border: none;
-  padding: 1rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-weight: 600;
   cursor: pointer;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.3s ease;
-}
-
-.tab-button:hover {
-  color: var(--color-primary);
+  position: relative;
 }
 
 .tab-button.active {
-  color: var(--color-primary);
-  font-weight: 700;
-  border-bottom-color: var(--color-primary);
+  color: transparent;
+  background-image: var(--color-primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  border-color: var(--color-border-hover);
 }
 
-/* Tab Content */
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-primary-gradient);
+}
+
 .tab-content {
   display: none;
 }
 
 .tab-content.active {
   display: block;
-  animation: fadeIn 0.4s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Appointments Header */
 .appointments-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.8rem;
 }
 
 .appointments-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .appointments-count {
-  font-size: 0.875rem;
   color: var(--color-text-muted);
-  margin: 0;
 }
 
-/* Cancel Message */
 .cancel-message {
-  color: #34D399;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  min-height: 1.25rem;
+  min-height: 1.1rem;
+  margin-bottom: 0.65rem;
+  color: var(--color-text-secondary);
 }
 
-/* Appointments Table */
 .table-wrapper {
-  overflow-x: auto;
-}
-
-.appointments-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-.appointments-table thead {
-  background-color: var(--color-primary);
-  color: white;
-}
-
-.appointments-table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  white-space: nowrap;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
 }
 
 .appointments-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #E5E7EB;
+  color: var(--color-text-secondary);
 }
 
-.appointments-table tbody tr {
-  background-color: white;
-  transition: all 0.4s ease;
+.appointments-table td:first-child,
+.appointments-table td:nth-child(2) {
+  color: var(--color-text);
 }
 
-.appointments-table tbody tr:nth-child(even) {
-  background-color: #F9FAFB;
-}
-
-.appointments-table tbody tr:hover {
-  background-color: #EAF4FB;
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 0.375rem 0.75rem;
-  border-radius: 50px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.status-confirmed {
-  background-color: #DBEAFE;
-  color: #1E40AF;
-}
-
-.status-completed {
-  background-color: #D1FAE5;
-  color: #065F46;
-}
-
-/* Action Buttons */
-.btn-cancel {
-  background-color: #FEE2E2;
-  color: #DC2626;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-size: 0.8125rem;
+.btn-cancel,
+.btn-book-again {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
 }
 
-.btn-cancel:hover {
-  background-color: #DC2626;
-  color: white;
+.btn-cancel {
+  background: rgba(239,68,68,0.15);
+  color: #EF4444;
+  border-color: rgba(239,68,68,0.3);
 }
 
 .btn-book-again {
-  background-color: #DBEAFE;
-  color: #1E40AF;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  background: rgba(79,142,247,0.15);
+  color: #4F8EF7;
+  border-color: rgba(79,142,247,0.3);
 }
 
-.btn-book-again:hover {
-  background-color: var(--color-primary);
-  color: white;
+#upcomingAppointments td[colspan],
+#pastAppointments td[colspan] {
+  color: var(--color-text-muted) !important;
+  text-align: center;
 }
 
-/* Info Grid */
+#upcomingAppointments td[colspan]::before,
+#pastAppointments td[colspan]::before {
+  content: '📅';
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+#upcomingAppointments td[colspan] {
+  position: relative;
+}
+
+#upcomingAppointments td[colspan]::after {
+  content: 'No appointments yet';
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.9rem;
+}
+
 .info-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
 }
 
 .info-grid-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 0.25rem;
 }
 
 .info-grid-label {
-  font-size: 0.875rem;
   color: var(--color-text-muted);
-  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .info-grid-value {
-  font-size: 1rem;
-  color: var(--color-text);
-  font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
-/* Fade Out Animation for Row Removal */
-.fade-out-row {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-/* Responsive Design */
-@media (max-width: 48rem) {
+@media (max-width: 68rem) {
   .profile-layout {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .profile-sidebar {
-    width: 100%;
-    position: relative;
-    top: 0;
-    text-align: center;
+    position: static;
   }
+}
 
-  .profile-main {
-    width: 100%;
-  }
-
-  .profile-container {
-    padding: 2rem 0;
-  }
-
-  .profile-main {
-    padding: 1.5rem;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .tab-button {
-    padding: 0.875rem 1rem;
-    font-size: 0.875rem;
-    white-space: nowrap;
-  }
-
+@media (max-width: 40rem) {
   .info-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .appointments-table {
-    font-size: 0.8125rem;
-  }
-
-  .appointments-table th,
-  .appointments-table td {
-    padding: 0.75rem 0.5rem;
-  }
-}
-
-@media (max-width: 30rem) {
-  .profile-sidebar {
-    padding: 1.5rem 1rem;
-  }
-
-  .profile-avatar {
-    margin: 0 auto 1rem;
-  }
-
-  .tabs {
-    flex-direction: column;
-    border-bottom: none;
-    gap: 0.75rem;
-  }
-
-  .tab-button {
-    width: 100%;
-    margin-bottom: 0;
-    border: 1px solid #E5E7EB;
-    border-radius: 0.75rem;
-  }
-
-  .tab-button.active {
-    border-bottom-color: transparent;
   }
 }

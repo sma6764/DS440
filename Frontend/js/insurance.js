@@ -1,6 +1,6 @@
 // Insurance page - Enhanced instant filtering with text highlighting
 
-const API_BASE = 'http://localhost/check-me-up/backend/api';
+const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadPricingTable();

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient View - Check-me-up</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/admin-dashboard.css">
+  <link rel="stylesheet" href="../css/admin-patient-view.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <button type="button" class="sidebar-close" aria-label="Close menu">✕</button>
+
+      <div class="sidebar-brand">
+        <h3 class="brand-logo">Check-me-up</h3>
+        <p class="brand-tagline">Command center for clinic operations.</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin-dashboard.html" class="nav-link" data-section="overview"><span class="nav-icon">📊</span><span class="nav-label">Overview</span></a>
+        <a href="admin-dashboard.html" class="nav-link" data-section="doctors"><span class="nav-icon">👥</span><span class="nav-label">Manage Doctors</span></a>
+        <a href="admin-dashboard.html" class="nav-link active" data-section="patients"><span class="nav-icon">👥</span><span class="nav-label">Manage Patients</span></a>
+        <a href="admin-dashboard.html" class="nav-link" data-section="branches"><span class="nav-icon">🏥</span><span class="nav-label">Manage Branches</span></a>
+        <a href="admin-dashboard.html" class="nav-link" data-section="appointments"><span class="nav-icon">📅</span><span class="nav-label">Appointments</span></a>
+        <a href="admin-dashboard.html" class="nav-link" data-section="reports"><span class="nav-icon">📈</span><span class="nav-label">Reports</span></a>
+        <a href="profile.html" class="nav-link"><span class="nav-icon">👥</span><span class="nav-label">My Profile</span></a>
+        <a href="logout.html" class="nav-link logout"><span class="nav-icon">🚪</span><span class="nav-label">Logout</span></a>
+      </nav>
+
+      <div class="admin-profile sidebar-user">
+        <div class="admin-avatar">AU</div>
+        <h3 class="admin-title">Amina Yusuf</h3>
+        <p class="admin-role">Administrator</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="container-fluid">
+
+        <!-- Back Button -->
+        <div class="patient-view-header">
+          <a href="admin-dashboard.html" class="back-link">← Back to Admin Panel</a>
+        </div>
+
+        <!-- Patient Profile Hero Section -->
+        <div class="patient-hero" id="patient-hero-skeleton">
+          <div class="hero-skeleton">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-text" style="width: 250px; height: 32px; margin-bottom: 1rem;"></div>
+              <div class="skeleton-text" style="width: 200px; height: 18px; margin-bottom: 0.5rem;"></div>
+              <div class="skeleton-text" style="width: 180px; height: 18px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="patient-hero" id="patient-hero" style="display: none;">
+          <div class="hero-content">
+            <div class="hero-avatar">
+              <span id="patient-initials">--</span>
+            </div>
+            <div class="hero-info">
+              <h1 id="patient-name" class="patient-name">Loading...</h1>
+              <p id="patient-contact" class="patient-contact">
+                <span id="patient-email">--</span> • <span id="patient-phone">--</span>
+              </p>
+              <p id="patient-demographics" class="patient-demographics">
+                <span id="patient-gender">--</span> • DOB: <span id="patient-dob">--</span>
+              </p>
+              <p id="patient-member-since" class="patient-member-since">Member since <span id="patient-created">--</span></p>
+            </div>
+            <div class="hero-sidebar">
+              <div class="insurance-badge" id="patient-insurance-badge">
+                <span id="insurance-text">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats Row -->
+          <div class="quick-stats">
+            <div class="stat-pill">
+              <div class="stat-pill-number" id="total-appointments-count">0</div>
+              <div class="stat-pill-label">Total Appointments</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-number" id="upcoming-appointments-count">0</div>
+              <div class="stat-pill-label">Upcoming</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-number" id="completed-appointments-count">0</div>
+              <div class="stat-pill-label">Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="patient-sections">
+
+          <!-- Appointment History Section -->
+          <section class="patient-section">
+            <h2 class="section-title with-accent">Appointment History</h2>
+            <div class="section-card">
+              <div id="appointment-history-skeleton" class="appointment-skeleton">
+                <div class="skeleton-row"></div>
+                <div class="skeleton-row"></div>
+                <div class="skeleton-row"></div>
+              </div>
+              <table class="patient-table" id="appointment-table" style="display: none;">
+                <thead>
+                  <tr>
+                    <th>Doctor</th>
+                    <th>Specialty</th>
+                    <th>Branch</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="appointment-tbody">
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Patient Information Section -->
+          <section class="patient-section">
+            <h2 class="section-title with-accent">Patient Information</h2>
+            <div class="section-card patient-info-card">
+              <div id="patient-info-skeleton" class="info-skeleton">
+                <div class="skeleton-field"></div>
+                <div class="skeleton-field"></div>
+                <div class="skeleton-field"></div>
+                <div class="skeleton-field"></div>
+              </div>
+              <div class="info-grid" id="patient-info-grid" style="display: none;">
+                <div class="info-field">
+                  <span class="info-label">Full Name</span>
+                  <span class="info-value" id="info-full-name">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Email</span>
+                  <span class="info-value" id="info-email">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Phone</span>
+                  <span class="info-value" id="info-phone">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Gender</span>
+                  <span class="info-value" id="info-gender">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Date of Birth</span>
+                  <span class="info-value" id="info-dob">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Insurance Company</span>
+                  <span class="info-value" id="info-insurance">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">Member Since</span>
+                  <span class="info-value" id="info-created">--</span>
+                </div>
+                <div class="info-field">
+                  <span class="info-label">User ID</span>
+                  <span class="info-value" id="info-id">--</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Activity Summary Section -->
+          <section class="patient-section">
+            <h2 class="section-title with-accent">Activity Summary</h2>
+            <div class="section-card activity-summary-card">
+              <div id="activity-summary-skeleton" class="summary-skeleton">
+                <div class="skeleton-summary-item"></div>
+                <div class="skeleton-summary-item"></div>
+                <div class="skeleton-summary-item"></div>
+                <div class="skeleton-summary-item"></div>
+              </div>
+              <div class="activity-grid" id="activity-grid" style="display: none;">
+                <div class="activity-item">
+                  <span class="activity-label">Account Created</span>
+                  <span class="activity-value" id="activity-created">--</span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-label">Total Appointments</span>
+                  <span class="activity-value" id="activity-total">0</span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-label">Most Visited Specialist</span>
+                  <span class="activity-value" id="activity-specialist">--</span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-label">Most Visited Branch</span>
+                  <span class="activity-value" id="activity-branch">--</span>
+                </div>
+                <div class="activity-item">
+                  <span class="activity-label">Last Appointment</span>
+                  <span class="activity-value" id="activity-last">--</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Error State -->
+        <div id="patient-error" style="display: none;">
+          <div class="error-card">
+            <h2>Patient Not Found</h2>
+            <p>The patient you're looking for doesn't exist or has been removed.</p>
+            <a href="admin-dashboard.html" class="btn-primary">Back to Admin Panel</a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/navbar.js"></script>
+  <script src="../js/dashboard.js"></script>
+  <script src="../js/admin-patient-view.js"></script>
+</body>
+</html>

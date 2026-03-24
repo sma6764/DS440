@@ -1,6 +1,6 @@
 // Register.js - Registration page functionality
 
-const API_BASE = 'http://localhost/check-me-up/backend/api';
+const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
 
 document.addEventListener('DOMContentLoaded', () => {
   // checkExistingSession(); // COMMENTED OUT FOR FRONTEND DEMO
@@ -150,10 +150,9 @@ function initializeRegistrationForm() {
       return;
     }
 
-    // Validate password strength
-    const strength = calculatePasswordStrength(password);
-    if (strength === 'weak') {
-      errorMessage.textContent = 'Password is too weak. Use at least 6 characters';
+    // Validate password length to match backend policy
+    if (password.length < 8) {
+      errorMessage.textContent = 'Password must be at least 8 characters';
       return;
     }
 
@@ -194,11 +193,21 @@ function initializeRegistrationForm() {
       },
       body: JSON.stringify(registrationData)
     })
-    .then(response => {
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({
+        success: false,
+        message: 'Unexpected server response'
+      }));
+
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        return {
+          ...data,
+          success: false,
+          message: data.message || 'Registration failed. Please check your input.'
+        };
       }
-      return response.json();
+
+      return data;
     })
     .then(data => {
       // Remove loading state
@@ -221,8 +230,8 @@ function initializeRegistrationForm() {
       registerButton.disabled = false;
       registerButton.textContent = originalText;
 
-      // Show connection error
-      errorMessage.textContent = 'Could not connect to server. Please make sure the app is running.';
+      // Show connection/parsing error
+      errorMessage.textContent = 'Could not connect to server. Please make sure MySQL and Apache are running.';
       errorMessage.style.color = 'red';
       console.error('Registration error:', error);
     });

@@ -1,6 +1,12 @@
 // Login.js - Login page functionality
 
-const API_BASE = 'http://localhost/check-me-up/backend/api';
+const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
+const MAX_FAILED_ATTEMPTS = 3;
+const LOCKOUT_SECONDS = 30;
+
+let failedAttempts = 0;
+let lockoutUntil = 0;
+let lockoutTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   // checkExistingSession(); // COMMENTED OUT FOR FRONTEND DEMO
@@ -86,14 +92,157 @@ function initializeLoginForm() {
   const loginForm = document.getElementById('loginForm');
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
+  const emailError = document.getElementById('emailError');
+  const passwordError = document.getElementById('passwordError');
+  const accountErrorBanner = document.getElementById('accountErrorBanner');
   const errorMessage = document.getElementById('errorMessage');
   const loginButton = loginForm.querySelector('.btn-login');
 
-  loginForm.addEventListener('submit', (e) => {
+  if (!loginForm || !emailInput || !passwordInput || !loginButton) {
+    return;
+  }
+
+  const clearAllErrors = () => {
+    if (emailError) emailError.textContent = '';
+    if (passwordError) passwordError.textContent = '';
+    if (errorMessage) errorMessage.textContent = '';
+    if (accountErrorBanner) {
+      accountErrorBanner.textContent = '';
+      accountErrorBanner.classList.remove('visible');
+    }
+  };
+
+  const clearEmailError = () => {
+    if (emailError) emailError.textContent = '';
+    if (errorMessage) errorMessage.textContent = '';
+    if (accountErrorBanner) {
+      accountErrorBanner.textContent = '';
+      accountErrorBanner.classList.remove('visible');
+    }
+  };
+
+  const clearPasswordError = () => {
+    if (passwordError) passwordError.textContent = '';
+    if (errorMessage) errorMessage.textContent = '';
+    if (accountErrorBanner) {
+      accountErrorBanner.textContent = '';
+      accountErrorBanner.classList.remove('visible');
+    }
+    passwordInput.classList.remove('shake');
+  };
+
+  const setButtonBusyState = (isBusy, label) => {
+    if (isBusy) {
+      loginButton.classList.add('btn-loading');
+      loginButton.disabled = true;
+      return;
+    }
+
+    loginButton.classList.remove('btn-loading');
+    loginButton.textContent = label;
+
+    if (Date.now() < lockoutUntil) {
+      loginButton.disabled = true;
+    } else {
+      loginButton.disabled = false;
+    }
+  };
+
+  const showBannerError = (message) => {
+    if (!accountErrorBanner) return;
+    accountErrorBanner.textContent = message;
+    accountErrorBanner.classList.add('visible');
+  };
+
+  const triggerPasswordShake = () => {
+    passwordInput.classList.remove('shake');
+    // Force reflow so the animation can replay on repeated wrong attempts.
+    void passwordInput.offsetWidth;
+    passwordInput.classList.add('shake');
+  };
+
+  const setLockoutState = () => {
+    lockoutUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+    loginButton.classList.remove('btn-loading');
+    loginButton.disabled = true;
+
+    const updateLockoutMessage = () => {
+      const remainingSeconds = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000));
+      if (errorMessage) {
+        if (remainingSeconds > 0) {
+          errorMessage.textContent = `Too many failed attempts. Please wait ${remainingSeconds} seconds.`;
+        } else {
+          errorMessage.textContent = '';
+        }
+      }
+
+      if (remainingSeconds <= 0) {
+        clearInterval(lockoutTimer);
+        lockoutTimer = null;
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        loginButton.disabled = false;
+      }
+    };
+
+    updateLockoutMessage();
+    if (lockoutTimer) {
+      clearInterval(lockoutTimer);
+    }
+    lockoutTimer = setInterval(updateLockoutMessage, 1000);
+  };
+
+  const handleLoginFailure = (code, fallbackMessage, emailValue, passwordValue) => {
+    switch (code) {
+      case 'EMAIL_NOT_FOUND':
+        if (emailError) emailError.textContent = 'No account found with this email.';
+        failedAttempts += 1;
+        break;
+      case 'WRONG_PASSWORD':
+        if (passwordError) passwordError.textContent = 'Incorrect password. Please try again.';
+        triggerPasswordShake();
+        failedAttempts += 1;
+        break;
+      case 'ACCOUNT_INACTIVE':
+        showBannerError('Your account has been deactivated. Contact support at hello@checkmeup.com');
+        failedAttempts += 1;
+        break;
+      case 'MISSING_FIELDS':
+        if (!emailValue && emailError) {
+          emailError.textContent = 'Please enter your email.';
+        }
+        if (!passwordValue && passwordError) {
+          passwordError.textContent = 'Please enter your password.';
+        }
+        break;
+      default:
+        if (errorMessage) {
+          errorMessage.textContent = fallbackMessage || 'Login failed. Please try again.';
+        }
+        failedAttempts += 1;
+        break;
+    }
+
+    if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+      setLockoutState();
+    }
+  };
+
+  emailInput.addEventListener('input', clearEmailError);
+  passwordInput.addEventListener('input', clearPasswordError);
+
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Clear previous error
-    errorMessage.textContent = '';
+    if (Date.now() < lockoutUntil) {
+      if (errorMessage) {
+        const remaining = Math.max(1, Math.ceil((lockoutUntil - Date.now()) / 1000));
+        errorMessage.textContent = `Too many failed attempts. Please wait ${remaining} seconds.`;
+      }
+      return;
+    }
+
+    clearAllErrors();
 
     // Get input values
     const email = emailInput.value.trim();
@@ -101,53 +250,57 @@ function initializeLoginForm() {
 
     // Validate inputs
     if (!email || !password) {
-      errorMessage.textContent = 'Please fill in all fields';
+      if (!email && emailError) {
+        emailError.textContent = 'Please enter your email.';
+      }
+      if (!password && passwordError) {
+        passwordError.textContent = 'Please enter your password.';
+      }
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      errorMessage.textContent = 'Please enter a valid email address';
+      if (emailError) {
+        emailError.textContent = 'Please enter a valid email address.';
+      }
       return;
     }
 
     // Show loading state
     const originalText = loginButton.textContent;
-    loginButton.classList.add('btn-loading');
-    loginButton.disabled = true;
+    setButtonBusyState(true, originalText);
 
-    // Send login request to backend
-    fetch(`${API_BASE}/auth/login.php`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+    try {
+      const response = await fetch(`${API_BASE}/auth/login.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch (parseError) {
+        payload = null;
       }
-      return response.json();
-    })
-    .then(data => {
-      // Remove loading state
-      loginButton.classList.remove('btn-loading');
-      loginButton.disabled = false;
-      loginButton.textContent = originalText;
 
-      if (data.success) {
-        // Store user data in localStorage
-        localStorage.setItem('checkmeup_user', JSON.stringify(data.data));
-        localStorage.setItem('checkmeup_role', data.data.role);
-        
-        // Redirect based on role
-        const role = data.data.role;
+      const success = Boolean(payload?.success) && response.ok;
+
+      if (success) {
+        failedAttempts = 0;
+
+        localStorage.setItem('checkmeup_user', JSON.stringify(payload.data));
+        localStorage.setItem('checkmeup_role', payload.data.role);
+
+        const role = payload.data.role;
         if (role === 'doctor') {
           window.location.href = 'doctor-dashboard.html';
         } else if (role === 'admin') {
@@ -155,22 +308,17 @@ function initializeLoginForm() {
         } else {
           window.location.href = 'profile.html';
         }
-      } else {
-        // Show error message from API
-        errorMessage.textContent = data.message || 'Login failed. Please try again.';
-        errorMessage.style.color = 'red';
+        return;
       }
-    })
-    .catch(error => {
-      // Remove loading state
-      loginButton.classList.remove('btn-loading');
-      loginButton.disabled = false;
-      loginButton.textContent = originalText;
 
-      // Show connection error
-      errorMessage.textContent = 'Could not connect to server. Please make sure the app is running.';
-      errorMessage.style.color = 'red';
+      handleLoginFailure(payload?.code, payload?.message || 'Login failed. Please try again.', email, password);
+    } catch (error) {
       console.error('Login error:', error);
-    });
+      if (errorMessage) {
+        errorMessage.textContent = 'Could not connect to server. Please make sure the app is running.';
+      }
+    } finally {
+      setButtonBusyState(false, originalText);
+    }
   });
 }

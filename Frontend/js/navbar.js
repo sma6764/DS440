@@ -3,7 +3,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   updateNavbarAuthState();
   initializeNavbarMenu();
+  initializeFooterContactInfo();
 });
+
+if (!window.API_BASE) {
+  window.API_BASE = 'http://localhost/check-me-up/backend/api';
+}
 
 function updateNavbarAuthState() {
   // Check if user is logged in from localStorage
@@ -13,6 +18,11 @@ function updateNavbarAuthState() {
   // Find the navbar container (different pages have different structures)
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
+
+  const navLinks = navbar.querySelector('.nav-links');
+  if (!navLinks) return;
+
+  ensureNavbarCtas(navLinks);
   
   // Find the login button in navbar
   const loginButton = navbar.querySelector('a[href="login.html"]');
@@ -79,6 +89,8 @@ function initializeNavbarMenu() {
   const navLinks = navbar.querySelector('.nav-links');
   if (!navbarContent || !navLinks) return;
 
+  ensureNavbarCtas(navLinks);
+
   let toggleButton = navbar.querySelector('.nav-toggle');
 
   if (!toggleButton) {
@@ -122,4 +134,92 @@ function initializeNavbarMenu() {
       closeMenu();
     }
   });
+}
+
+function ensureNavbarCtas(navLinks) {
+  const ensureLink = (selector, href, text, className) => {
+    let link = navLinks.querySelector(selector);
+    if (!link) {
+      link = document.createElement('a');
+      link.href = href;
+      link.textContent = text;
+    }
+
+    link.className = className;
+    link.href = href;
+    link.textContent = text;
+    return link;
+  };
+
+  const checkSymptomsLink = ensureLink(
+    'a.nav-cta-check',
+    'symptom-checker.html',
+    '🩺 Check Symptoms',
+    'btn-secondary nav-cta nav-cta-check'
+  );
+
+  const bookNowLink = ensureLink(
+    'a.nav-cta-book',
+    'booking.html',
+    '📅 Book Now',
+    'btn-primary nav-cta nav-cta-book'
+  );
+
+  const insertionTarget =
+    navLinks.querySelector('a[href="login.html"]') ||
+    navLinks.querySelector('a[href="profile.html"], a[href="doctor-dashboard.html"], a[href="admin-dashboard.html"], a[href="logout.html"]');
+
+  if (insertionTarget) {
+    navLinks.insertBefore(checkSymptomsLink, insertionTarget);
+    navLinks.insertBefore(bookNowLink, insertionTarget);
+  } else {
+    navLinks.appendChild(checkSymptomsLink);
+    navLinks.appendChild(bookNowLink);
+  }
+}
+
+async function initializeFooterContactInfo() {
+  const footerContact = document.querySelector('.footer .footer-contact');
+  if (!footerContact) return;
+
+  // Keep email and instagram static, replace phone and address from first branch.
+  const defaultPhone = '+1 (215) 555-0100';
+  const defaultAddress = 'Philadelphia, PA';
+
+  let phone = defaultPhone;
+  let address = defaultAddress;
+
+  try {
+    const response = await fetch(`${API_BASE}/branches.php`, {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const firstBranch = Array.isArray(data) ? data[0] : data?.data?.[0];
+
+      if (firstBranch) {
+        phone = firstBranch.phone || firstBranch.phone_number || defaultPhone;
+        address = firstBranch.address || firstBranch.location || defaultAddress;
+      }
+    }
+  } catch (error) {
+    console.warn('Unable to load branch contact info for footer:', error);
+  }
+
+  footerContact.innerHTML = `
+    <li><span class="footer-contact-icon">📞</span><span>${escapeHtml(phone)}</span></li>
+    <li><span class="footer-contact-icon">📧</span><span>hello@checkmeup.com</span></li>
+    <li><span class="footer-contact-icon">📍</span><span>${escapeHtml(address)}</span></li>
+    <li><span class="footer-contact-icon">📸</span><span>@checkmeup</span></li>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

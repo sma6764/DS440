@@ -8,71 +8,274 @@
   <link rel="stylesheet" href="../css/admin-dashboard.css">
 </head>
 <body>
-  <div class="dashboard-container">
+  <div class="dashboard-wrapper">
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="admin-profile">
-        <div class="admin-avatar">👤</div>
-        <h3 class="admin-title">Admin Panel</h3>
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-logo">Check-me-up</h2>
+        <p class="sidebar-tagline">Healthcare Platform</p>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-link active" data-section="overview">Overview</a>
-        <a href="#" class="nav-link" data-section="doctors">Manage Doctors</a>
-        <a href="#" class="nav-link" data-section="patients">Manage Patients</a>
-        <a href="#" class="nav-link" data-section="branches">Manage Branches</a>
-        <a href="#" class="nav-link" data-section="appointments">Appointments</a>
-        <a href="#" class="nav-link" data-section="reports">Reports</a>
-        <a href="profile.html" class="nav-link">My Profile</a>
-        <a href="logout.html" class="nav-link logout">Logout</a>
+      <div class="sidebar-search">
+        <input type="text" class="search-input" placeholder="Search...">
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <nav class="sidebar-navigation">
+        <!-- MAIN Section -->
+        <div class="nav-section">
+          <div class="nav-section-label">MAIN</div>
+          <a href="#" class="nav-item active" data-section="overview">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Overview</span>
+          </a>
+          <a href="#" class="nav-item" data-section="doctors">
+            <span class="nav-icon">👨‍⚕️</span>
+            <span class="nav-label">Doctors</span>
+          </a>
+          <a href="#" class="nav-item" data-section="patients">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">Patients</span>
+          </a>
+          <a href="#" class="nav-item" data-section="branches">
+            <span class="nav-icon">🏥</span>
+            <span class="nav-label">Branches</span>
+          </a>
+        </div>
+
+        <!-- DATA Section -->
+        <div class="nav-section">
+          <div class="nav-section-label">DATA</div>
+          <a href="#" class="nav-item" data-section="appointments">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Appointments</span>
+          </a>
+          <a href="#" class="nav-item" data-section="reports">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">Reports</span>
+          </a>
+        </div>
+
+        <!-- SUPPORT Section -->
+        <div class="nav-section">
+          <div class="nav-section-label">SUPPORT</div>
+          <a href="profile.html" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+          </a>
+          <a href="logout.html" class="nav-item logout">
+            <span class="nav-icon">🚪</span>
+            <span class="nav-label">Logout</span>
+          </a>
+        </div>
       </nav>
+
+      <div class="sidebar-user-card">
+        <div class="user-avatar">AU</div>
+        <h4 class="user-name">Admin</h4>
+        <p class="user-role">Administrator</p>
+        <div class="online-indicator"></div>
+      </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <div class="container-fluid">
+    <!-- Main Content -->
+    <div class="dashboard-main">
+      <!-- Top Header Bar -->
+      <header class="dashboard-header">
+        <div class="header-left">
+          <h1 class="header-greeting">Welcome back, Admin!</h1>
+          <p class="header-subtitle" id="header-subtitle">Managing Check-me-up Philadelphia</p>
+        </div>
+
+        <div class="header-right">
+          <button class="header-icon-btn" title="Settings">⚙️</button>
+          <button class="header-icon-btn notification-btn" title="Notifications">
+            🔔
+            <span class="notification-badge" id="notification-badge">3</span>
+          </button>
+          <div class="header-avatar">AU</div>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <div class="dashboard-content">
         
         <!-- Overview Section -->
         <section class="content-section active" id="overview">
-          <h1 class="section-title">Overview</h1>
-          
-          <div class="stats-grid">
-            <div class="card stat-card">
-              <div class="stat-icon">👨‍⚕️</div>
-              <h2 class="stat-number">48</h2>
-              <p class="stat-label">Total Doctors</p>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-icon">👥</div>
-              <h2 class="stat-number">1,247</h2>
-              <p class="stat-label">Total Patients</p>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-icon">📅</div>
-              <h2 class="stat-number">89</h2>
-              <p class="stat-label">Today's Appointments</p>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-icon">🏥</div>
-              <h2 class="stat-number">4</h2>
-              <p class="stat-label">Total Branches</p>
-            </div>
-          </div>
+          <div class="section-container">
+            
+            <!-- Stat Cards Row -->
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-icon-box">👨‍⚕️</div>
+                <div class="stat-value">48</div>
+                <div class="stat-label">Total Doctors</div>
+                <div class="stat-chart">
+                  <div class="chart-bar" style="height: 45%;"></div>
+                  <div class="chart-bar" style="height: 60%;"></div>
+                  <div class="chart-bar" style="height: 35%;"></div>
+                  <div class="chart-bar" style="height: 70%;"></div>
+                  <div class="chart-bar" style="height: 50%;"></div>
+                </div>
+                <a href="#" class="stat-link" data-section="doctors">→</a>
+              </div>
 
-          <div class="card recent-activity">
-            <h3>Recent Activity</h3>
-            <div class="activity-list" id="admin-activity-list">
-              <div class="activity-item">
-                <span class="activity-time">2 min ago</span>
-                <span class="activity-text">New patient registered: Sarah Johnson</span>
+              <div class="stat-card">
+                <div class="stat-icon-box">👥</div>
+                <div class="stat-value">1,247</div>
+                <div class="stat-label">Total Patients</div>
+                <div class="stat-chart">
+                  <div class="chart-bar" style="height: 65%;"></div>
+                  <div class="chart-bar" style="height: 50%;"></div>
+                  <div class="chart-bar" style="height: 75%;"></div>
+                  <div class="chart-bar" style="height: 60%;"></div>
+                  <div class="chart-bar" style="height: 80%;"></div>
+                </div>
+                <a href="#" class="stat-link" data-section="patients">→</a>
               </div>
-              <div class="activity-item">
-                <span class="activity-time">15 min ago</span>
-                <span class="activity-text">Dr. Michael Williams updated availability</span>
+
+              <div class="stat-card">
+                <div class="stat-icon-box">📅</div>
+                <div class="stat-value">89</div>
+                <div class="stat-label">Today's Appointments</div>
+                <div class="stat-chart">
+                  <div class="chart-bar" style="height: 40%;"></div>
+                  <div class="chart-bar" style="height: 65%;"></div>
+                  <div class="chart-bar" style="height: 35%;"></div>
+                  <div class="chart-bar" style="height: 75%;"></div>
+                  <div class="chart-bar" style="height: 50%;"></div>
+                </div>
+                <a href="#" class="stat-link" data-section="appointments">→</a>
               </div>
-              <div class="activity-item">
-                <span class="activity-time">1 hour ago</span>
-                <span class="activity-text">New appointment booked at Downtown Medical Center</span>
+
+              <div class="stat-card">
+                <div class="stat-icon-box">🏥</div>
+                <div class="stat-value">3</div>
+                <div class="stat-label">Branches</div>
+                <div class="stat-chart">
+                  <div class="chart-bar" style="height: 50%;"></div>
+                  <div class="chart-bar" style="height: 55%;"></div>
+                  <div class="chart-bar" style="height: 45%;"></div>
+                  <div class="chart-bar" style="height: 60%;"></div>
+                  <div class="chart-bar" style="height: 40%;"></div>
+                </div>
+                <a href="#" class="stat-link" data-section="branches">→</a>
+              </div>
+            </div>
+
+            <!-- Recent Activity + Calendar Row -->
+            <div class="content-row">
+              <!-- Recent Activity Table -->
+              <div class="table-card">
+                <div class="table-header-section">
+                  <div>
+                    <h3>Recent Activity</h3>
+                    <p class="table-subtitle">Latest clinic operations</p>
+                  </div>
+                  <div class="table-controls">
+                    <select class="sort-dropdown" id="activity-sort">
+                      <option>Sort: Recent</option>
+                      <option>Appointments</option>
+                      <option>Registrations</option>
+                    </select>
+                    <a href="#" class="see-all-link">See All →</a>
+                  </div>
+                </div>
+
+                <div class="table-wrapper">
+                  <table class="patients-table">
+                    <thead>
+                      <tr>
+                        <th>Event</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recent-activity-tbody">
+                      <tr>
+                        <td>
+                          <div class="patient-cell">
+                            <div class="patient-avatar">NP</div>
+                            <div class="patient-info">
+                              <div class="patient-name">New Patient</div>
+                              <div class="patient-age">Registration</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>2 min ago</td>
+                        <td><span class="badge badge-confirmed">Registration</span></td>
+                        <td>Sarah Johnson registered</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="patient-cell">
+                            <div class="patient-avatar">DA</div>
+                            <div class="patient-info">
+                              <div class="patient-name">Doctor Activity</div>
+                              <div class="patient-age">Update</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>15 min ago</td>
+                        <td><span class="badge badge-pending">Update</span></td>
+                        <td>Dr. Williams updated availability</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="patient-cell">
+                            <div class="patient-avatar">AB</div>
+                            <div class="patient-info">
+                              <div class="patient-name">Appointment</div>
+                              <div class="patient-age">Booking</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>1 hour ago</td>
+                        <td><span class="badge badge-confirmed">Booking</span></td>
+                        <td>New appointment at Philadelphia Main</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Mini Calendar -->
+              <div class="calendar-card">
+                <div class="calendar-header">
+                  <button class="calendar-nav-btn" id="cal-prev">←</button>
+                  <h4 id="calendar-month">March 2026</h4>
+                  <button class="calendar-nav-btn" id="cal-next">→</button>
+                </div>
+
+                <div class="calendar-weekdays">
+                  <div>MON</div>
+                  <div>TUE</div>
+                  <div>WED</div>
+                  <div>THU</div>
+                  <div>FRI</div>
+                  <div>SAT</div>
+                  <div>SUN</div>
+                </div>
+
+                <div class="calendar-days" id="calendar-days">
+                  <!-- Generated by JS -->
+                </div>
+
+                <div class="calendar-legend">
+                  <div class="legend-item">
+                    <span class="legend-dot confirmed"></span>
+                    <span>Confirmed</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-dot pending"></span>
+                    <span>Pending</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-dot cancelled"></span>
+                    <span>Cancelled</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -80,345 +283,196 @@
 
         <!-- Manage Doctors Section -->
         <section class="content-section" id="doctors">
-          <h1 class="section-title">Manage Doctors</h1>
-          
-          <div class="card">
-            <div class="table-header">
-              <button class="btn-primary">Add New Doctor</button>
-            </div>
-            <div class="table-container">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Doctor Name</th>
-                    <th>Specialty</th>
-                    <th>Branch</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-doctors-body">
-                  <tr>
-                    <td>Dr. James Smith</td>
-                    <td>General Practitioner</td>
-                    <td>Downtown Medical Center</td>
-                    <td><span class="badge badge-active">Active</span></td>
-                    <td>
-                      <button class="action-btn btn-edit">Edit</button>
-                      <button class="action-btn btn-deactivate">Deactivate</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Dr. Sarah Johnson</td>
-                    <td>Cardiologist</td>
-                    <td>Northside Clinic</td>
-                    <td><span class="badge badge-active">Active</span></td>
-                    <td>
-                      <button class="action-btn btn-edit">Edit</button>
-                      <button class="action-btn btn-deactivate">Deactivate</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Dr. Michael Williams</td>
-                    <td>Dermatologist</td>
-                    <td>West End Health Hub</td>
-                    <td><span class="badge badge-active">Active</span></td>
-                    <td>
-                      <button class="action-btn btn-edit">Edit</button>
-                      <button class="action-btn btn-deactivate">Deactivate</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Dr. Emily Chen</td>
-                    <td>Pediatrician</td>
-                    <td>Eastside Family Care</td>
-                    <td><span class="badge badge-active">Active</span></td>
-                    <td>
-                      <button class="action-btn btn-edit">Edit</button>
-                      <button class="action-btn btn-deactivate">Deactivate</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Dr. Robert Thompson</td>
-                    <td>Neurologist</td>
-                    <td>Downtown Medical Center</td>
-                    <td><span class="badge badge-inactive">Inactive</span></td>
-                    <td>
-                      <button class="action-btn btn-edit">Edit</button>
-                      <button class="action-btn btn-deactivate">Activate</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="section-container">
+            <h2 class="section-title">Manage Doctors</h2>
+            
+            <div class="table-card">
+              <div class="table-header-section">
+                <h3>All Doctors</h3>
+                <a href="admin-add-doctor.html" class="btn-primary-small">+ Add New Doctor</a>
+              </div>
+              <div class="table-wrapper">
+                <table class="patients-table">
+                  <thead>
+                    <tr>
+                      <th>Doctor Name</th>
+                      <th>Specialty</th>
+                      <th>Branch</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-doctors-body">
+                    <tr>
+                      <td>Dr. James Smith</td>
+                      <td>General Practitioner</td>
+                      <td>Philadelphia Main</td>
+                      <td><span class="badge badge-confirmed">Active</span></td>
+                      <td><button class="btn-small">Edit</button></td>
+                    </tr>
+                    <tr>
+                      <td>Dr. Sarah Chen</td>
+                      <td>Cardiologist</td>
+                      <td>Pittsburgh Branch</td>
+                      <td><span class="badge badge-confirmed">Active</span></td>
+                      <td><button class="btn-small">Edit</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Manage Patients Section -->
         <section class="content-section" id="patients">
-          <h1 class="section-title">Manage Patients</h1>
-          
-          <div class="card">
-            <div class="table-container">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Patient Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Registered Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-patients-body">
-                  <tr>
-                    <td>John Anderson</td>
-                    <td>john.anderson@email.com</td>
-                    <td>(555) 123-4567</td>
-                    <td>Jan 15, 2025</td>
-                    <td>
-                      <button class="action-btn btn-edit">View</button>
-                      <button class="action-btn btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Sarah Johnson</td>
-                    <td>sarah.johnson@email.com</td>
-                    <td>(555) 234-5678</td>
-                    <td>Feb 3, 2025</td>
-                    <td>
-                      <button class="action-btn btn-edit">View</button>
-                      <button class="action-btn btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Michael Chen</td>
-                    <td>michael.chen@email.com</td>
-                    <td>(555) 345-6789</td>
-                    <td>Feb 20, 2025</td>
-                    <td>
-                      <button class="action-btn btn-edit">View</button>
-                      <button class="action-btn btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Emily Rodriguez</td>
-                    <td>emily.rodriguez@email.com</td>
-                    <td>(555) 456-7890</td>
-                    <td>March 1, 2026</td>
-                    <td>
-                      <button class="action-btn btn-edit">View</button>
-                      <button class="action-btn btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>David Park</td>
-                    <td>david.park@email.com</td>
-                    <td>(555) 567-8901</td>
-                    <td>March 5, 2026</td>
-                    <td>
-                      <button class="action-btn btn-edit">View</button>
-                      <button class="action-btn btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="section-container">
+            <h2 class="section-title">Manage Patients</h2>
+            
+            <div class="table-card">
+              <div class="table-header-section">
+                <h3>All Patients</h3>
+              </div>
+              <div class="table-wrapper">
+                <table class="patients-table">
+                  <thead>
+                    <tr>
+                      <th>Patient Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Registered</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-patients-body">
+                    <tr>
+                      <td>
+                        <div class="patient-cell">
+                          <div class="patient-avatar">SA</div>
+                          <div class="patient-info">
+                            <div class="patient-name">Sarah Anderson</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>sarah@email.com</td>
+                      <td>+1 (215) 555-0145</td>
+                      <td>Mar 15, 2026</td>
+                      <td><button class="btn-small btn-delete">Delete</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Manage Branches Section -->
         <section class="content-section" id="branches">
-          <h1 class="section-title">Manage Branches</h1>
-          
-          <div class="branch-header">
-            <button class="btn-primary">Add New Branch</button>
-          </div>
-
-          <div class="branches-grid" id="admin-branches-grid">
-            <div class="card branch-card">
-              <h4 class="branch-name">Downtown Medical Center</h4>
-              <p class="branch-address">123 Main Street, Suite 100<br>Downtown, CA 90001</p>
-              <div class="branch-stats">
-                <div class="branch-stat">
-                  <span class="stat-value">12</span>
-                  <span class="stat-text">Doctors</span>
-                </div>
-                <div class="branch-stat">
-                  <span class="stat-value">245</span>
-                  <span class="stat-text">Appointments/Month</span>
-                </div>
+          <div class="section-container">
+            <h2 class="section-title">Manage Branches</h2>
+            
+            <div class="table-card">
+              <div class="table-header-section">
+                <h3>All Branches</h3>
+                <a href="admin-add-branch.html" class="btn-primary-small">+ Add New Branch</a>
               </div>
-              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
-            </div>
-
-            <div class="card branch-card">
-              <h4 class="branch-name">Northside Clinic</h4>
-              <p class="branch-address">456 North Avenue, Building B<br>Northside, CA 90012</p>
-              <div class="branch-stats">
-                <div class="branch-stat">
-                  <span class="stat-value">10</span>
-                  <span class="stat-text">Doctors</span>
-                </div>
-                <div class="branch-stat">
-                  <span class="stat-value">198</span>
-                  <span class="stat-text">Appointments/Month</span>
-                </div>
+              <div class="table-wrapper">
+                <table class="patients-table">
+                  <thead>
+                    <tr>
+                      <th>Branch Name</th>
+                      <th>Address</th>
+                      <th>Doctors</th>
+                      <th>Appointments</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-branches-body">
+                    <tr>
+                      <td>Philadelphia Main</td>
+                      <td>1500 Market Street, Philadelphia, PA</td>
+                      <td>12</td>
+                      <td>245/month</td>
+                      <td><button class="btn-small">Edit</button></td>
+                    </tr>
+                    <tr>
+                      <td>Pittsburgh Branch</td>
+                      <td>100 Fifth Avenue, Pittsburgh, PA</td>
+                      <td>8</td>
+                      <td>198/month</td>
+                      <td><button class="btn-small">Edit</button></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
-            </div>
-
-            <div class="card branch-card">
-              <h4 class="branch-name">West End Health Hub</h4>
-              <p class="branch-address">789 West Boulevard<br>West End, CA 90023</p>
-              <div class="branch-stats">
-                <div class="branch-stat">
-                  <span class="stat-value">14</span>
-                  <span class="stat-text">Doctors</span>
-                </div>
-                <div class="branch-stat">
-                  <span class="stat-value">312</span>
-                  <span class="stat-text">Appointments/Month</span>
-                </div>
-              </div>
-              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
-            </div>
-
-            <div class="card branch-card">
-              <h4 class="branch-name">Eastside Family Care</h4>
-              <p class="branch-address">321 East Street, Floor 2<br>Eastside, CA 90034</p>
-              <div class="branch-stats">
-                <div class="branch-stat">
-                  <span class="stat-value">12</span>
-                  <span class="stat-text">Doctors</span>
-                </div>
-                <div class="branch-stat">
-                  <span class="stat-value">267</span>
-                  <span class="stat-text">Appointments/Month</span>
-                </div>
-              </div>
-              <button class="btn-secondary edit-branch-btn">Edit Branch</button>
             </div>
           </div>
         </section>
 
         <!-- Appointments Section -->
         <section class="content-section" id="appointments">
-          <h1 class="section-title">All Appointments</h1>
-          
-          <div class="card">
-            <div class="table-container">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Patient Name</th>
-                    <th>Doctor</th>
-                    <th>Branch</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-appointments-body">
-                  <tr>
-                    <td>Sarah Johnson</td>
-                    <td>Dr. James Smith</td>
-                    <td>Downtown Medical Center</td>
-                    <td>March 7, 2026</td>
-                    <td>9:00 AM</td>
-                    <td><span class="badge badge-confirmed">Confirmed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Michael Chen</td>
-                    <td>Dr. Sarah Johnson</td>
-                    <td>Northside Clinic</td>
-                    <td>March 7, 2026</td>
-                    <td>10:30 AM</td>
-                    <td><span class="badge badge-pending">Pending</span></td>
-                  </tr>
-                  <tr>
-                    <td>Emily Rodriguez</td>
-                    <td>Dr. Michael Williams</td>
-                    <td>West End Health Hub</td>
-                    <td>March 7, 2026</td>
-                    <td>2:00 PM</td>
-                    <td><span class="badge badge-confirmed">Confirmed</span></td>
-                  </tr>
-                  <tr>
-                    <td>David Park</td>
-                    <td>Dr. Emily Chen</td>
-                    <td>Eastside Family Care</td>
-                    <td>March 8, 2026</td>
-                    <td>9:30 AM</td>
-                    <td><span class="badge badge-confirmed">Confirmed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Jessica Martinez</td>
-                    <td>Dr. James Smith</td>
-                    <td>Downtown Medical Center</td>
-                    <td>March 8, 2026</td>
-                    <td>11:00 AM</td>
-                    <td><span class="badge badge-cancelled">Cancelled</span></td>
-                  </tr>
-                  <tr>
-                    <td>Robert Thompson</td>
-                    <td>Dr. Sarah Johnson</td>
-                    <td>Northside Clinic</td>
-                    <td>March 8, 2026</td>
-                    <td>3:00 PM</td>
-                    <td><span class="badge badge-pending">Pending</span></td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="section-container">
+            <h2 class="section-title">All Appointments</h2>
+            
+            <div class="table-card">
+              <div class="table-wrapper">
+                <table class="patients-table">
+                  <thead>
+                    <tr>
+                      <th>Patient</th>
+                      <th>Doctor</th>
+                      <th>Branch</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-appointments-body">
+                    <tr>
+                      <td>Sarah Anderson</td>
+                      <td>Dr. James Smith</td>
+                      <td>Philadelphia Main</td>
+                      <td>Mar 22, 2026</td>
+                      <td><span class="badge badge-confirmed">Confirmed</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Reports Section -->
         <section class="content-section" id="reports">
-          <h1 class="section-title">Reports</h1>
-          
-          <div class="reports-grid">
-            <div class="card report-card">
-              <div class="report-icon">📊</div>
-              <h3>Monthly Appointments Report</h3>
-              <p class="report-description">
-                Comprehensive breakdown of all appointments scheduled, completed, and cancelled for the current month.
-              </p>
-              <button class="btn-secondary download-btn">Download CSV</button>
-            </div>
-
-            <div class="card report-card">
-              <div class="report-icon">📈</div>
-              <h3>Doctor Performance Report</h3>
-              <p class="report-description">
-                Detailed analytics on doctor availability, patient ratings, appointment completion rates, and overall performance.
-              </p>
-              <button class="btn-secondary download-btn">Download CSV</button>
-            </div>
-
-            <div class="card report-card">
-              <div class="report-icon">💰</div>
-              <h3>Revenue Report</h3>
-              <p class="report-description">
-                Financial summary including total revenue, payments collected, outstanding balances, and insurance claims.
-              </p>
-              <button class="btn-secondary download-btn">Download CSV</button>
-            </div>
-
-            <div class="card report-card">
-              <div class="report-icon">👥</div>
-              <h3>Patient Demographics Report</h3>
-              <p class="report-description">
-                Statistical analysis of patient demographics, age groups, specialty preferences, and appointment patterns.
-              </p>
-              <button class="btn-secondary download-btn">Download CSV</button>
+          <div class="section-container">
+            <h2 class="section-title">Reports</h2>
+            
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-icon-box">📊</div>
+                <div class="stat-label">Monthly Appointments</div>
+                <a href="#" class="stat-link">Download →</a>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon-box">👨‍⚕️</div>
+                <div class="stat-label">Doctor Performance</div>
+                <a href="#" class="stat-link">Download →</a>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon-box">💰</div>
+                <div class="stat-label">Revenue Report</div>
+                <a href="#" class="stat-link">Download →</a>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon-box">📈</div>
+                <div class="stat-label">Demographics</div>
+                <a href="#" class="stat-link">Download →</a>
+              </div>
             </div>
           </div>
         </section>
 
       </div>
-    </main>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -430,7 +484,7 @@
           <h3 class="footer-brand">Check-me-up</h3>
           <p class="footer-tagline">Your health, booked in minutes.</p>
           <div class="footer-social">
-            <a href="https://instagram.com/checkmeup.ae" target="_blank" class="social-link">📸 Instagram</a>
+            <a href="https://instagram.com/checkmeup" target="_blank" class="social-link">📸 Instagram</a>
           </div>
         </div>
 
@@ -451,10 +505,10 @@
         <div class="footer-column">
           <h4 class="footer-heading">Contact Info</h4>
           <ul class="footer-contact">
-            <li>📞 +971 50 000 0000</li>
-            <li>📧 hello@checkmeup.ae</li>
-            <li>📍 Abu Dhabi, UAE</li>
-            <li>📸 @checkmeup.ae</li>
+            <li>📞 +1 (215) 555-0100</li>
+            <li>📧 hello@checkmeup.com</li>
+            <li>📍 Philadelphia, PA</li>
+            <li>📸 @checkmeup</li>
           </ul>
         </div>
       </div>
@@ -469,7 +523,7 @@
     </div>
   </footer>
 
-  <a href="index.html" class="back-home-btn" style="position: fixed; left: 1rem; bottom: 1rem; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 999px; background-color: #4A90D9; color: #FFFFFF; font-weight: 600; font-size: 0.9rem; text-decoration: none; box-shadow: 0 8px 24px rgba(74, 144, 217, 0.35);">Back to Main Page</a>
+  <a href="index.html" class="back-home-btn">Back to Main Page</a>
 
   <script src="../js/back-home.js"></script>
   <script src="../js/navbar.js"></script>

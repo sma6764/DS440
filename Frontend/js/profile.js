@@ -1,6 +1,6 @@
 // Profile.js - Patient profile page functionality
 
-const API_BASE = 'http://localhost/check-me-up/backend/api';
+const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadUserProfile();
@@ -71,76 +71,12 @@ function loadAppointments(type) {
     return;
   }
 
-  const emptyCols = 7;
-  tableBody.innerHTML = `<tr><td colspan="${emptyCols}" style="text-align: center; padding: 2rem; color: #6B7280;">Loading appointments...</td></tr>`;
+  tableBody.innerHTML = '';
 
-  fetch(`${API_BASE}/patient/appointments.php?type=${type}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (!data.success || !Array.isArray(data.data)) {
-        tableBody.innerHTML = `<tr><td colspan="${emptyCols}" style="text-align: center; padding: 2rem; color: #EF4444;">Could not load data. Please try again.</td></tr>`;
-        return;
-      }
-
-      const appointments = data.data;
-      tableBody.innerHTML = '';
-
-      if (appointments.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="${emptyCols}" style="text-align: center; padding: 2rem; color: #6B7280;">No ${type} appointments found</td></tr>`;
-        const countElement = tabContent.querySelector('.appointments-count');
-        if (countElement) {
-          countElement.textContent = `You have no ${type} appointments`;
-        }
-        return;
-      }
-
-      appointments.forEach(appointment => {
-        const row = document.createElement('tr');
-
-        if (type === 'upcoming') {
-          row.innerHTML = `
-            <td>${appointment.doctor_name || 'N/A'}</td>
-            <td>${appointment.specialty || 'N/A'}</td>
-            <td>${appointment.branch || 'N/A'}</td>
-            <td>${appointment.date || 'N/A'}</td>
-            <td>${appointment.time || 'N/A'}</td>
-            <td><span class="status-badge status-confirmed">${appointment.status || 'pending'}</span></td>
-            <td><button class="btn-cancel" data-id="${appointment.id}">Cancel</button></td>
-          `;
-        } else {
-          row.innerHTML = `
-            <td>${appointment.doctor_name || 'N/A'}</td>
-            <td>${appointment.specialty || 'N/A'}</td>
-            <td>${appointment.branch || 'N/A'}</td>
-            <td>${appointment.date || 'N/A'}</td>
-            <td>${appointment.time || 'N/A'}</td>
-            <td><span class="status-badge status-completed">${appointment.status || 'completed'}</span></td>
-            <td><button class="btn-book-again">Book Again</button></td>
-          `;
-        }
-
-        tableBody.appendChild(row);
-      });
-
-      const countElement = tabContent.querySelector('.appointments-count');
-      if (countElement) {
-        if (appointments.length === 1) {
-          countElement.textContent = `You have 1 ${type === 'upcoming' ? 'upcoming appointment' : 'completed appointment'}`;
-        } else {
-          countElement.textContent = `You have ${appointments.length} ${type === 'upcoming' ? 'upcoming appointments' : 'completed appointments'}`;
-        }
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching appointments:', error);
-      tableBody.innerHTML = `<tr><td colspan="${emptyCols}" style="text-align: center; padding: 2rem; color: #EF4444;">Could not load data. Please try again.</td></tr>`;
-    });
+  const countElement = tabContent.querySelector('.appointments-count');
+  if (countElement) {
+    countElement.textContent = `You have no ${type} appointments`;
+  }
 }
 
 function initializeTabSwitching() {
@@ -169,96 +105,13 @@ function initializeTabSwitching() {
 
 function initializeCancelAppointment() {
   const upcomingTable = document.getElementById('upcomingAppointments');
-  const cancelMessage = document.getElementById('cancelMessage');
-
   if (!upcomingTable) {
     return;
   }
 
-  upcomingTable.addEventListener('click', event => {
-    const button = event.target.closest('.btn-cancel');
-    if (!button) {
-      return;
-    }
-
-    const appointmentId = button.getAttribute('data-id');
-    const row = button.closest('tr');
-    const doctorName = row && row.cells[0] ? row.cells[0].textContent : 'doctor';
-
-    button.disabled = true;
-    button.textContent = 'Cancelling...';
-
-    fetch(`${API_BASE}/patient/appointments.php`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ id: parseInt(appointmentId, 10) })
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && row) {
-          row.remove();
-          if (cancelMessage) {
-            cancelMessage.textContent = `Appointment with ${doctorName} cancelled successfully`;
-            cancelMessage.style.color = '#34D399';
-            setTimeout(() => {
-              cancelMessage.textContent = '';
-            }, 4000);
-          }
-          updateAppointmentsCount();
-          return;
-        }
-
-        if (cancelMessage) {
-          cancelMessage.textContent = data.message || 'Failed to cancel appointment';
-          cancelMessage.style.color = '#EF4444';
-          setTimeout(() => {
-            cancelMessage.textContent = '';
-          }, 4000);
-        }
-
-        button.disabled = false;
-        button.textContent = 'Cancel';
-      })
-      .catch(error => {
-        console.error('Error cancelling appointment:', error);
-        if (cancelMessage) {
-          cancelMessage.textContent = 'Failed to cancel appointment. Please try again.';
-          cancelMessage.style.color = '#EF4444';
-          setTimeout(() => {
-            cancelMessage.textContent = '';
-          }, 4000);
-        }
-
-        button.disabled = false;
-        button.textContent = 'Cancel';
-      });
+  upcomingTable.addEventListener('click', () => {
+    // Intentionally disabled.
   });
-}
-
-function updateAppointmentsCount() {
-  const upcomingTable = document.getElementById('upcomingAppointments');
-  const countElement = document.querySelector('#upcoming .appointments-count');
-
-  if (!upcomingTable || !countElement) {
-    return;
-  }
-
-  const appointmentRows = Array.from(upcomingTable.querySelectorAll('tr')).filter(row => {
-    const cells = row.querySelectorAll('td');
-    return cells.length > 1;
-  });
-
-  const remainingCount = appointmentRows.length;
-  if (remainingCount === 0) {
-    countElement.textContent = 'You have no upcoming appointments';
-  } else if (remainingCount === 1) {
-    countElement.textContent = 'You have 1 upcoming appointment';
-  } else {
-    countElement.textContent = `You have ${remainingCount} upcoming appointments`;
-  }
 }
 
 function initializeBookAgain() {
@@ -267,13 +120,8 @@ function initializeBookAgain() {
     return;
   }
 
-  pastTable.addEventListener('click', event => {
-    const button = event.target.closest('.btn-book-again');
-    if (!button) {
-      return;
-    }
-
-    window.location.href = 'booking.html';
+  pastTable.addEventListener('click', () => {
+    // Intentionally disabled.
   });
 }
 

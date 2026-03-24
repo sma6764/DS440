@@ -42,7 +42,7 @@ const specialistMap = {
   'general practitioner': specialistDatabase.general
 };
 
-const API_BASE = '../../Backend/api';
+const API_BASE = window.API_BASE || '../../Backend/api';
 const CLIENT_VERSION = '20260315-3';
 
 // Get DOM elements

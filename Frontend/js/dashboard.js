@@ -1,75 +1,191 @@
 // Dashboard.js - Enhanced with smooth animations and interactions
 
-const API_BASE = 'http://localhost/check-me-up/backend/api';
+const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  initializeDashboardMobileMenu();
+  setHeaderGreeting();
+  initializeAdminMobileSidebar();
+  initializeNavigation();
   initializeSidebarNavigation();
-  initializeDoctorSchedule();
-  initializeReportDownloads();
+  loadDashboardData();
+  initializeCalendarWidget();
+  initializeDateNavigation();
   addSectionTransitions();
   checkDashboardAccess();
 });
 
-function initializeDashboardMobileMenu() {
-  const container = document.querySelector('.dashboard-container');
-  const sidebar = document.querySelector('.sidebar');
-  const mainContent = document.querySelector('.main-content');
+// Set greeting based on time of day
+function setHeaderGreeting() {
+  const greetingElement = document.querySelector('.header-greeting');
+  const subtitleElement = document.querySelector('#header-subtitle');
+  
+  if (!greetingElement) return;
 
-  if (!container || !sidebar || !mainContent || document.querySelector('.dashboard-topbar')) {
-    return;
+  const hour = new Date().getHours();
+  let greeting = 'Good Morning';
+  
+  if (hour >= 12 && hour < 18) {
+    greeting = 'Good Afternoon';
+  } else if (hour >= 18) {
+    greeting = 'Good Evening';
   }
 
-  const titleElement = document.querySelector('.doctor-name, .admin-title');
-  const topbar = document.createElement('div');
-  topbar.className = 'dashboard-topbar';
-  topbar.innerHTML = `
-    <div class="dashboard-topbar-title">${titleElement ? titleElement.textContent.trim() : 'Dashboard'}</div>
-    <button type="button" class="dashboard-menu-toggle" aria-label="Toggle dashboard menu" aria-expanded="false">☰</button>
-  `;
+  // Get user name from session
+  fetch(`${API_BASE}/auth/session.php`, {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success && result.data?.user_name) {
+      greetingElement.textContent = `${greeting}, ${result.data.user_name}!`;
 
-  container.insertBefore(topbar, mainContent);
-
-  const overlay = document.createElement('button');
-  overlay.type = 'button';
-  overlay.className = 'dashboard-overlay';
-  overlay.setAttribute('aria-label', 'Close dashboard menu');
-  document.body.appendChild(overlay);
-
-  const toggleButton = topbar.querySelector('.dashboard-menu-toggle');
-
-  const closeMenu = () => {
-    document.body.classList.remove('dashboard-sidebar-open');
-    toggleButton.setAttribute('aria-expanded', 'false');
-  };
-
-  toggleButton.addEventListener('click', () => {
-    const isOpen = document.body.classList.toggle('dashboard-sidebar-open');
-    toggleButton.setAttribute('aria-expanded', String(isOpen));
-  });
-
-  overlay.addEventListener('click', closeMenu);
-
-  sidebar.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
-        closeMenu();
+      if (subtitleElement) {
+        subtitleElement.textContent = '';
       }
+    }
+  })
+  .catch(err => {
+    greetingElement.textContent = greeting;
+  });
+}
+
+// Initialize calendar widget
+function initializeCalendarWidget() {
+  const calendar = document.getElementById('calendar-days');
+  const monthDisplay = document.getElementById('calendar-month');
+  
+  if (!calendar) return;
+
+  renderCalendar(new Date());
+  
+  // Add month/year display if not present
+  if (!monthDisplay && calendar.parentElement) {
+    const header = calendar.parentElement.querySelector('.calendar-header h4');
+    if (header) {
+      header.textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+  }
+}
+
+// Render calendar month
+function renderCalendar(date = new Date()) {
+  const calendar = document.getElementById('calendar-days');
+  const monthDisplay = document.querySelector('.calendar-header h4');
+  
+  if (!calendar) return;
+
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDate = new Date(firstDay);
+  startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+  // Update month display
+  if (monthDisplay) {
+    monthDisplay.textContent = new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  const days = [];
+  const currentDate = new Date(startDate);
+  const today = new Date();
+
+  while (currentDate < lastDay || currentDate.getDay() !== 0) {
+    days.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  calendar.innerHTML = days.map(day => {
+    const isToday = day.toDateString() === today.toDateString();
+    const isCurrentMonth = day.getMonth() === month;
+    const dayClass = isToday ? 'today' : (isCurrentMonth ? '' : 'disabled');
+    
+    return `
+      <div class="calendar-day ${dayClass}" data-date="${day.toISOString().split('T')[0]}">
+        ${day.getDate()}
+      </div>
+    `;
+  }).join('');
+}
+
+// Initialize date navigation buttons
+function initializeDateNavigation() {
+  const prevBtn = document.querySelector('.calendar-nav-btn:first-child');
+  const nextBtn = document.querySelector('.calendar-nav-btn:last-child');
+  let currentMonth = new Date();
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
+      renderCalendar(currentMonth);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1);
+      renderCalendar(currentMonth);
+    });
+  }
+}
+
+// Initialize navigation with new data-section attributes
+function initializeNavigation() {
+  const navItems = document.querySelectorAll('.nav-item[data-section]');
+  
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const sectionId = item.getAttribute('data-section');
+      const section = document.getElementById(sectionId);
+      
+      if (!section) return;
+
+      // Update active state
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+
+      // Update section visibility
+      document.querySelectorAll('.content-section').forEach(s => {
+        s.classList.remove('active');
+      });
+      section.classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      closeMenu();
+  // Set first item as active
+  if (navItems.length > 0) {
+    navItems[0].classList.add('active');
+    const firstSection = document.getElementById(navItems[0].getAttribute('data-section'));
+    if (firstSection) {
+      firstSection.classList.add('active');
     }
+  }
+}
+
+// Load dashboard data based on role
+function loadDashboardData() {
+  clearDashboardDataDisplay();
+}
+
+function clearDashboardDataDisplay() {
+  document.querySelectorAll('.stat-value').forEach((card) => {
+    card.textContent = '';
   });
 
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-      closeMenu();
-    }
+  document.querySelectorAll('.patients-table tbody').forEach((tbody) => {
+    tbody.innerHTML = '';
   });
+
+  const branchesTable = document.querySelector('section:nth-of-type(4) .patients-table');
+  if (branchesTable && !branchesTable.querySelector('tbody')) {
+    branchesTable.innerHTML = '';
+  }
 }
 
 // Check if user has access to current dashboard
@@ -85,25 +201,29 @@ function checkDashboardAccess() {
   })
   .then(response => response.json())
   .then(result => {
-
+    if (!result.success) {
+      // No session, redirect to login
+      window.location.href = 'login.html';
+      return;
+    }
     
     const role = result.data.user_role;
     
-    
-    
-    // Load dashboard data for authorized role
-    if (isAdminDashboard && role === 'admin') {
-      loadAdminDashboardData();
+    // Check doctor dashboard access
+    if (isDoctorDashboard && role !== 'doctor') {
+      window.location.href = 'login.html';
       return;
     }
-
-    if (isDoctorDashboard && role === 'doctor') {
-      loadDoctorDashboardData();
+    
+    // Check admin dashboard access
+    if (isAdminDashboard && role !== 'admin') {
+      window.location.href = 'login.html';
       return;
     }
   })
   .catch(error => {
     console.error('Session check error:', error);
+    window.location.href = 'login.html';
   });
 }
 
@@ -126,20 +246,19 @@ function loadAdminDashboardData() {
     const data = result.data;
     const stats = data.stats || {};
 
-    const statCards = document.querySelectorAll('.stat-card .stat-number');
+    const statCards = document.querySelectorAll('.stat-value');
     if (statCards[0]) statCards[0].textContent = stats.total_doctors ?? 0;
     if (statCards[1]) statCards[1].textContent = stats.total_patients ?? 0;
     if (statCards[2]) statCards[2].textContent = stats.todays_appointments ?? 0;
     if (statCards[3]) statCards[3].textContent = stats.total_branches ?? 0;
 
-    renderAdminActivity(data.recent_activity || []);
+    renderAdminRecentActivity(data.recent_activity || []);
     renderAdminDoctors(data.doctors || []);
     renderAdminPatients(data.patients || []);
     renderAdminBranches(data.branches || []);
     renderAdminAppointments(data.appointments || []);
 
     animateStatCards();
-    initializeAdminControls();
   })
   .catch(error => {
     console.error('Error loading admin dashboard data:', error);
@@ -164,25 +283,13 @@ function loadDoctorDashboardData() {
 
     const data = result.data;
 
-    const doctorName = document.querySelector('.doctor-name');
-    const doctorSpecialty = document.querySelector('.doctor-specialty');
-    if (doctorName && data.profile?.full_name) {
-      doctorName.textContent = data.profile.full_name;
-    }
-    if (doctorSpecialty && data.profile?.specialty) {
-      doctorSpecialty.textContent = data.profile.specialty;
-    }
+    const statCards = document.querySelectorAll('.stat-value');
+    if (statCards[0]) statCards[0].textContent = data.stats?.todays_appointments ?? 0;
+    if (statCards[1]) statCards[1].textContent = data.stats?.total_patients ?? 0;
+    if (statCards[2]) statCards[2].textContent = data.stats?.pending_confirmations ?? 0;
 
-    const todayStat = document.getElementById('doctor-stat-today');
-    const patientsStat = document.getElementById('doctor-stat-patients');
-    const pendingStat = document.getElementById('doctor-stat-pending');
-
-    if (todayStat) todayStat.textContent = data.stats?.todays_appointments ?? 0;
-    if (patientsStat) patientsStat.textContent = data.stats?.total_patients ?? 0;
-    if (pendingStat) pendingStat.textContent = data.stats?.pending_confirmations ?? 0;
-
+    renderDoctorRecentPatients(data.patients?.slice(0, 5) || []);
     renderDoctorAppointments(data.appointments || []);
-    renderDoctorPatients(data.patients || []);
 
     animateStatCards();
   })
@@ -191,28 +298,34 @@ function loadDoctorDashboardData() {
   });
 }
 
-function renderAdminActivity(items) {
-  const container = document.getElementById('admin-activity-list');
-  if (!container) return;
+function renderAdminRecentActivity(items) {
+  const tbody = document.querySelector('#overview .patients-table tbody');
+  if (!tbody) return;
 
   if (!items.length) {
-    container.innerHTML = '<div class="activity-item"><span class="activity-text">No recent activity found.</span></div>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">No recent activity</td></tr>';
     return;
   }
 
-  container.innerHTML = items.map((item) => {
-    const when = formatRelativeTime(item.time);
-    return `
-      <div class="activity-item">
-        <span class="activity-time">${when}</span>
-        <span class="activity-text">${item.text}</span>
-      </div>
-    `;
-  }).join('');
+  tbody.innerHTML = items.slice(0, 5).map((item) => `
+    <tr>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${item.initials || 'N'}</div>
+          <div class="patient-info">
+            <div class="patient-name">${item.user_name || 'Unknown'}</div>
+            <div class="patient-age">${item.action || 'Activity'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${formatTime(item.time)}</td>
+      <td><span class="badge badge-confirmed">${item.type || 'Update'}</span></td>
+    </tr>
+  `).join('');
 }
 
 function renderAdminDoctors(doctors) {
-  const tbody = document.getElementById('admin-doctors-body');
+  const tbody = document.querySelector('section:nth-of-type(2) .patients-table tbody');
   if (!tbody) return;
 
   if (!doctors.length) {
@@ -220,28 +333,25 @@ function renderAdminDoctors(doctors) {
     return;
   }
 
-  tbody.innerHTML = doctors.map((doctor) => {
-    const statusClass = doctor.is_active ? 'badge-active' : 'badge-inactive';
-    const statusText = doctor.is_active ? 'Active' : 'Inactive';
-    const actionText = doctor.is_active ? 'Deactivate' : 'Activate';
-
-    return `
-      <tr>
-        <td>${doctor.full_name}</td>
-        <td>${doctor.specialty}</td>
-        <td>${doctor.branch}</td>
-        <td><span class="badge ${statusClass}">${statusText}</span></td>
-        <td>
-          <button class="action-btn btn-edit">Edit</button>
-          <button class="action-btn btn-deactivate">${actionText}</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  tbody.innerHTML = doctors.slice(0, 5).map((doctor) => `
+    <tr>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${(doctor.full_name || 'D').charAt(0).toUpperCase()}</div>
+          <div class="patient-info">
+            <div class="patient-name">${doctor.full_name || 'N/A'}</div>
+            <div class="patient-age">${doctor.specialty || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${doctor.branch || 'N/A'}</td>
+      <td><span class="badge badge-confirmed">${doctor.is_active ? 'Active' : 'Inactive'}</span></td>
+    </tr>
+  `).join('');
 }
 
 function renderAdminPatients(patients) {
-  const tbody = document.getElementById('admin-patients-body');
+  const tbody = document.querySelector('section:nth-of-type(3) .patients-table tbody');
   if (!tbody) return;
 
   if (!patients.length) {
@@ -249,71 +359,109 @@ function renderAdminPatients(patients) {
     return;
   }
 
-  tbody.innerHTML = patients.map((patient) => `
+  tbody.innerHTML = patients.slice(0, 5).map((patient) => `
     <tr>
-      <td>${patient.full_name || 'N/A'}</td>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${(patient.full_name || 'P').charAt(0).toUpperCase()}</div>
+          <div class="patient-info">
+            <div class="patient-name">${patient.full_name || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
       <td>${patient.email || 'N/A'}</td>
       <td>${patient.phone || 'N/A'}</td>
-      <td>${formatDate(patient.registered_at)}</td>
+      <td>${formatDate(patient.registered_at) || 'N/A'}</td>
+      <td><button class="btn-small btn-delete">Delete</button></td>
+    </tr>
+  `).join('');
+
+  initializeDeleteButtons();
+}
+
+function renderAdminBranches(branches) {
+  const grid = document.querySelector('section:nth-of-type(4) .patients-table');
+  if (!grid) return;
+
+  if (!branches.length) {
+    grid.innerHTML = '<div style="text-align:center; color:#6B7280;">No branches found</div>';
+    return;
+  }
+
+  const tbody = grid.querySelector('tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = branches.slice(0, 5).map((branch) => `
+    <tr>
       <td>
-        <button class="action-btn btn-edit">View</button>
-        <button class="action-btn btn-delete">Delete</button>
+        <div class="patient-cell">
+          <div class="patient-avatar">📍</div>
+          <div class="patient-info">
+            <div class="patient-name">${branch.name || 'N/A'}</div>
+            <div class="patient-age">${branch.city || 'N/A'}</div>
+          </div>
+        </div>
       </td>
+      <td>${branch.doctor_count || 0}</td>
+      <td><span class="badge badge-completed">${branch.appointment_count || 0} appts</span></td>
     </tr>
   `).join('');
 }
 
-function renderAdminBranches(branches) {
-  const grid = document.getElementById('admin-branches-grid');
-  if (!grid) return;
-
-  if (!branches.length) {
-    grid.innerHTML = '<div class="card" style="text-align:center; color:#6B7280;">No branches found</div>';
-    return;
-  }
-
-  grid.innerHTML = branches.map((branch) => `
-    <div class="card branch-card">
-      <h4 class="branch-name">${branch.name}</h4>
-      <p class="branch-address">${branch.address}<br>${branch.city}</p>
-      <div class="branch-stats">
-        <div class="branch-stat">
-          <span class="stat-value">${branch.doctor_count}</span>
-          <span class="stat-text">Doctors</span>
-        </div>
-        <div class="branch-stat">
-          <span class="stat-value">${branch.appointment_count}</span>
-          <span class="stat-text">Appointments</span>
-        </div>
-      </div>
-      <button class="btn-secondary edit-branch-btn">Edit Branch</button>
-    </div>
-  `).join('');
-}
-
 function renderAdminAppointments(appointments) {
-  const tbody = document.getElementById('admin-appointments-body');
+  const tbody = document.querySelector('section:nth-of-type(5) .patients-table tbody');
   if (!tbody) return;
 
   if (!appointments.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem; color:#6B7280;">No appointments found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">No appointments found</td></tr>';
     return;
   }
 
-  tbody.innerHTML = appointments.map((appointment) => `
+  tbody.innerHTML = appointments.slice(0, 5).map((appointment) => `
     <tr>
-      <td>${appointment.patient_name}</td>
-      <td>${appointment.doctor_name}</td>
-      <td>${appointment.branch}</td>
-      <td>${formatDate(appointment.date)}</td>
-      <td>${formatTime(appointment.time)}</td>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${(appointment.patient_name || 'P').charAt(0).toUpperCase()}</div>
+          <div class="patient-info">
+            <div class="patient-name">${appointment.patient_name || 'N/A'}</div>
+            <div class="patient-age">${appointment.doctor_name || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${formatDate(appointment.date) || 'N/A'}</td>
       <td><span class="badge ${statusBadgeClass(appointment.status)}">${capitalize(appointment.status)}</span></td>
     </tr>
   `).join('');
 }
 
+function renderDoctorRecentPatients(patients) {
+  const tbody = document.querySelector('#overview .patients-table tbody');
+  if (!tbody) return;
+
+  if (!patients.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">No patients found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = patients.map((patient, index) => `
+    <tr>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${(patient.full_name || 'P').charAt(0).toUpperCase()}</div>
+          <div class="patient-info">
+            <div class="patient-name">${patient.full_name || 'N/A'}</div>
+            <div class="patient-age">Age: ${patient.age || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${formatDate(patient.last_visit) || 'N/A'}</td>
+      <td><span class="badge badge-completed">Visited</span></td>
+    </tr>
+  `).join('');
+}
+
 function renderDoctorAppointments(appointments) {
-  const tbody = document.getElementById('doctor-appointments-body');
+  const tbody = document.querySelector('#appointments .patients-table tbody');
   if (!tbody) return;
 
   if (!appointments.length) {
@@ -323,32 +471,18 @@ function renderDoctorAppointments(appointments) {
 
   tbody.innerHTML = appointments.map((appointment) => `
     <tr>
-      <td>${appointment.patient_name}</td>
-      <td>${formatDate(appointment.date)}</td>
-      <td>${formatTime(appointment.time)}</td>
-      <td>${appointment.specialty}</td>
+      <td>
+        <div class="patient-cell">
+          <div class="patient-avatar">${(appointment.patient_name || 'P').charAt(0).toUpperCase()}</div>
+          <div class="patient-info">
+            <div class="patient-name">${appointment.patient_name || 'N/A'}</div>
+          </div>
+        </div>
+      </td>
+      <td>${formatDate(appointment.date) || 'N/A'}</td>
+      <td>${formatTime(appointment.time) || 'N/A'}</td>
       <td><span class="badge ${statusBadgeClass(appointment.status)}">${capitalize(appointment.status)}</span></td>
     </tr>
-  `).join('');
-}
-
-function renderDoctorPatients(patients) {
-  const grid = document.getElementById('doctor-patients-grid');
-  if (!grid) return;
-
-  if (!patients.length) {
-    grid.innerHTML = '<div class="card" style="text-align:center; color:#6B7280;">No patients found</div>';
-    return;
-  }
-
-  grid.innerHTML = patients.map((patient, index) => `
-    <div class="card patient-card">
-      <div class="patient-avatar">${index % 2 === 0 ? '👨' : '👩'}</div>
-      <h4 class="patient-name">${patient.full_name}</h4>
-      <p class="patient-info">Age: ${patient.age ?? 'N/A'}</p>
-      <p class="patient-info">Last Visit: ${formatDate(patient.last_visit)}</p>
-      <button class="btn-secondary view-profile-btn">View Profile</button>
-    </div>
   `).join('');
 }
 
@@ -361,9 +495,13 @@ function formatDate(value) {
 
 function formatTime(value) {
   if (!value) return 'N/A';
-  const date = new Date(`1970-01-01T${value}`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  try {
+    const date = new Date(`1970-01-01T${value}`);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch {
+    return value;
+  }
 }
 
 function formatRelativeTime(value) {
@@ -384,7 +522,7 @@ function statusBadgeClass(status) {
   if (status === 'confirmed') return 'badge-confirmed';
   if (status === 'pending') return 'badge-pending';
   if (status === 'cancelled') return 'badge-cancelled';
-  if (status === 'completed') return 'badge-confirmed';
+  if (status === 'completed') return 'badge-completed';
   return 'badge-pending';
 }
 
@@ -403,7 +541,7 @@ function addSectionTransitions() {
 
 // Animate stat cards with count-up effect
 function animateStatCards() {
-  const statNumbers = document.querySelectorAll('.stat-number');
+  const statNumbers = document.querySelectorAll('.stat-value');
   
   statNumbers.forEach(stat => {
     const text = stat.textContent.trim();
@@ -443,10 +581,20 @@ function animateCountUp(element, start, end, duration, isPercentage = false) {
 
 // Sidebar Navigation with smooth transitions
 function initializeSidebarNavigation() {
-  const navLinks = document.querySelectorAll('.sidebar-nav .nav-link:not(.logout)');
+  const navItems = document.querySelectorAll('.nav-item:not(.logout)');
   const sections = document.querySelectorAll('.content-section');
+  const wrapper = document.querySelector('.dashboard-wrapper');
+  const overlay = document.querySelector('.dashboard-sidebar-overlay');
 
-  navLinks.forEach(link => {
+  const closeMobileSidebar = () => {
+    if (!wrapper) return;
+    wrapper.classList.remove('sidebar-open');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
+  };
+
+  navItems.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
 
@@ -454,7 +602,7 @@ function initializeSidebarNavigation() {
       const sectionId = link.dataset.section;
 
       // Update active state on nav links
-      navLinks.forEach(l => l.classList.remove('active'));
+      navItems.forEach(l => l.classList.remove('active'));
       link.classList.add('active');
 
       // Hide all sections with fade out
@@ -481,16 +629,85 @@ function initializeSidebarNavigation() {
 
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (window.innerWidth <= 768) {
+        closeMobileSidebar();
+      }
     });
   });
 
   // Logout link handler (allow real logout page flow)
-  const logoutLink = document.querySelector('.nav-link.logout');
+  const logoutLink = document.querySelector('.nav-item.logout');
   if (logoutLink) {
     logoutLink.addEventListener('click', () => {
       logoutLink.classList.add('btn-loading');
     });
   }
+}
+
+function initializeAdminMobileSidebar() {
+  const isAdminDashboard = window.location.pathname.includes('admin-dashboard');
+  if (!isAdminDashboard) return;
+
+  const wrapper = document.querySelector('.dashboard-wrapper');
+  const sidebar = document.querySelector('.dashboard-sidebar');
+  if (!wrapper || !sidebar) return;
+
+  let overlay = document.querySelector('.dashboard-sidebar-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'dashboard-sidebar-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  let hamburgerButton = document.querySelector('.dashboard-hamburger-btn');
+  if (!hamburgerButton) {
+    hamburgerButton = document.createElement('button');
+    hamburgerButton.type = 'button';
+    hamburgerButton.className = 'dashboard-hamburger-btn';
+    hamburgerButton.setAttribute('aria-label', 'Open sidebar menu');
+    hamburgerButton.textContent = '☰';
+    document.body.appendChild(hamburgerButton);
+  }
+
+  let closeButton = sidebar.querySelector('.dashboard-sidebar-close-btn');
+  if (!closeButton) {
+    closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'dashboard-sidebar-close-btn';
+    closeButton.setAttribute('aria-label', 'Close sidebar menu');
+    closeButton.textContent = '✕';
+    sidebar.appendChild(closeButton);
+  }
+
+  const openSidebar = () => {
+    if (window.innerWidth > 768) return;
+    wrapper.classList.add('sidebar-open');
+    overlay.classList.add('active');
+  };
+
+  const closeSidebar = () => {
+    wrapper.classList.remove('sidebar-open');
+    overlay.classList.remove('active');
+  };
+
+  hamburgerButton.addEventListener('click', openSidebar);
+  closeButton.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  sidebar.querySelectorAll('.nav-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      closeSidebar();
+    }
+  });
 }
 
 // Doctor Dashboard - Schedule Toggles with smooth animation
