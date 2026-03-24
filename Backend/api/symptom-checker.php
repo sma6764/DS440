@@ -2,9 +2,42 @@
 require_once '../config/cors.php';
 
 // ── Gemini API Configuration ─────────────────────────────────────────────────
-// Get your free API key at: https://aistudio.google.com/app/apikey
-// Then replace the placeholder below with your actual key.
-define('GEMINI_API_KEY', 'AIzaSyCIQGHulpA_8xY1MgoLL9TGhomZHFzUcBU');
+// API key is loaded from environment (do not hardcode secrets in source control).
+// Example: setx GEMINI_API_KEY "your_key_here"  (new terminal/session required)
+function resolveGeminiApiKey(): string {
+    $candidates = [
+        getenv('GEMINI_API_KEY') ?: null,
+        $_ENV['GEMINI_API_KEY'] ?? null,
+        $_SERVER['GEMINI_API_KEY'] ?? null
+    ];
+
+    foreach ($candidates as $candidate) {
+        if (is_string($candidate) && trim($candidate) !== '') {
+            return trim($candidate);
+        }
+    }
+
+    // Optional local override file for development on Windows/Apache.
+    // File format options:
+    // 1) return 'your-key';
+    // 2) return ['GEMINI_API_KEY' => 'your-key'];
+    $localPath = __DIR__ . '/../config/gemini.local.php';
+    if (is_file($localPath)) {
+        $localValue = include $localPath;
+
+        if (is_string($localValue) && trim($localValue) !== '') {
+            return trim($localValue);
+        }
+
+        if (is_array($localValue) && !empty($localValue['GEMINI_API_KEY']) && is_string($localValue['GEMINI_API_KEY'])) {
+            return trim($localValue['GEMINI_API_KEY']);
+        }
+    }
+
+    return '';
+}
+
+define('GEMINI_API_KEY', resolveGeminiApiKey());
 define('GEMINI_MODEL',   'gemini-2.0-flash');
 define('GEMINI_FALLBACK_MODELS', [
     'gemini-2.0-flash',
@@ -46,6 +79,11 @@ function classifySpecialistFromText(string $text): string {
     }
 
     return 'General Practitioner';
+}
+
+function buildFallbackReply(string $specialist): string {
+    $label = $specialist;
+    return "Thanks for sharing your symptoms. Based on what you described, a preliminary recommendation is to see a {$label}. If your symptoms become severe or sudden, please seek urgent medical care right away.";
 }
 
 function callGeminiModel(array $payload, string $model): array {
@@ -103,7 +141,7 @@ foreach ($messages as $msg) {
 $systemInstruction = [
     'parts' => [[
         'text' =>
-        'You are a friendly AI health assistant for Check-me-up, a medical clinic with many branches.' .
+        'You are a friendly AI health assistant for Check-me-up, a medical clinic in Pennsylvania, USA. ' .
         'Your job is to:' . "\n" .
         '1. Have a warm, empathetic conversation with the patient about their symptoms.' . "\n" .
         '2. Ask at most one or two clarifying questions if more detail is needed.' . "\n" .
@@ -143,6 +181,25 @@ $payload = [
         'maxOutputTokens' => 512
     ]
 ];
+
+$lastUserMessage = '';
+for ($i = count($messages) - 1; $i >= 0; $i--) {
+    if (($messages[$i]['role'] ?? '') === 'user') {
+        $lastUserMessage = (string)$messages[$i]['content'];
+        break;
+    }
+}
+
+// Fallback disabled for direct API-key verification tests.
+if (GEMINI_API_KEY === '') {
+    http_response_code(200);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Gemini API key is not configured. Restart Apache after setx, or add Backend/config/gemini.local.php.',
+        'upstream_status' => 0
+    ]);
+    exit;
+}
 
 $modelsToTry = array_values(array_unique(array_merge([GEMINI_MODEL], GEMINI_FALLBACK_MODELS)));
 $response = false;
@@ -227,13 +284,6 @@ if (preg_match('/SPECIALIST_RECOMMENDATION:\s*(.+)/i', $replyText, $matches)) {
 
 // Safety net: if the model omits the recommendation tag, classify from latest user input.
 if ($specialist === null) {
-    $lastUserMessage = '';
-    for ($i = count($messages) - 1; $i >= 0; $i--) {
-        if (($messages[$i]['role'] ?? '') === 'user') {
-            $lastUserMessage = (string)$messages[$i]['content'];
-            break;
-        }
-    }
     $specialist = classifySpecialistFromText($lastUserMessage);
 }
 

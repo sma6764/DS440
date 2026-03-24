@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data = json_decode(file_get_contents("php://input"), true);
 
 // Extract fields from request
+$full_name = isset($data['full_name']) ? trim($data['full_name']) : '';
 $email = isset($data['email']) ? trim($data['email']) : '';
 $phone = isset($data['phone']) ? trim($data['phone']) : '';
 $date_of_birth = isset($data['date_of_birth']) ? trim($data['date_of_birth']) : '';
@@ -21,9 +22,10 @@ $gender = isset($data['gender']) ? trim($data['gender']) : '';
 $password = isset($data['password']) ? $data['password'] : '';
 $confirm_password = isset($data['confirm_password']) ? $data['confirm_password'] : '';
 $insurance_company = isset($data['insurance_company']) ? trim($data['insurance_company']) : null;
+$insurance_company = normalizeInsuranceCompany($insurance_company);
 
 // Validate all required fields are present and not empty
-if (empty($email) || empty($phone) || empty($date_of_birth) || empty($gender) || empty($password) || empty($confirm_password)) {
+if (empty($full_name) || empty($email) || empty($phone) || empty($date_of_birth) || empty($gender) || empty($password) || empty($confirm_password)) {
     sendResponse(false, "All fields are required");
 }
 
@@ -60,7 +62,6 @@ $password_hash = password_hash($password, PASSWORD_BCRYPT);
 // Insert new user into database
 $stmt = $conn->prepare("INSERT INTO users (full_name, email, phone, password_hash, date_of_birth, gender, role, insurance_company) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-$full_name = ''; // Will be added to profile later
 $role = 'patient';
 
 $stmt->bind_param("ssssssss", $full_name, $email, $phone, $password_hash, $date_of_birth, $gender, $role, $insurance_company);

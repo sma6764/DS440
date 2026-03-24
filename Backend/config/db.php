@@ -5,7 +5,10 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'checkmeup');
 
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+// Prevent mysqli from throwing uncaught exceptions on connection/query failures.
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$conn = @mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 if (!$conn) {
     $logFile = dirname(__DIR__) . '/logs/errors.log';

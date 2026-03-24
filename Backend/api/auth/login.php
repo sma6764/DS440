@@ -19,11 +19,11 @@ $password = isset($data['password']) ? $data['password'] : '';
 
 // Validate that email and password are present and not empty
 if (empty($email) || empty($password)) {
-    sendResponse(false, "Email and password are required");
+    sendResponse(false, "Please enter both email and password.", null, "MISSING_FIELDS");
 }
 
 // Query the users table for the email
-$stmt = $conn->prepare("SELECT id, full_name, email, password_hash, role, insurance_company FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT u.id, u.full_name, u.email, u.password_hash, u.role, u.insurance_company, d.is_active AS doctor_is_active FROM users u LEFT JOIN doctors d ON d.user_id = u.id WHERE u.email = ? LIMIT 1");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -32,16 +32,24 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
     $stmt->close();
     $conn->close();
-    sendResponse(false, "Invalid email or password");
+    sendResponse(false, "No account found with this email address.", null, "EMAIL_NOT_FOUND");
 }
 
 $user = $result->fetch_assoc();
 $stmt->close();
 
+$normalizedInsurance = normalizeInsuranceCompany($user['insurance_company']);
+
+// Check if doctor account is inactive
+if ($user['role'] === 'doctor' && isset($user['doctor_is_active']) && (int)$user['doctor_is_active'] === 0) {
+    $conn->close();
+    sendResponse(false, "Your account has been deactivated. Please contact support.", null, "ACCOUNT_INACTIVE");
+}
+
 // Verify password
 if (!password_verify($password, $user['password_hash'])) {
     $conn->close();
-    sendResponse(false, "Invalid email or password");
+    sendResponse(false, "Incorrect password. Please try again.", null, "WRONG_PASSWORD");
 }
 
 // Login successful - store user data in session
@@ -49,7 +57,7 @@ $_SESSION['user_id'] = $user['id'];
 $_SESSION['user_email'] = $user['email'];
 $_SESSION['user_name'] = $user['full_name'];
 $_SESSION['user_role'] = $user['role'];
-$_SESSION['user_insurance'] = $user['insurance_company'];
+$_SESSION['user_insurance'] = $normalizedInsurance;
 
 // Close database connection
 $conn->close();
@@ -60,6 +68,6 @@ sendResponse(true, "Login successful", [
     'name' => $user['full_name'],
     'email' => $user['email'],
     'role' => $user['role'],
-    'insurance' => $user['insurance_company']
+    'insurance' => $normalizedInsurance
 ]);
 ?>

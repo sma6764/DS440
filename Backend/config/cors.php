@@ -9,7 +9,7 @@ $allowedOrigins = [
     'http://127.0.0.1',
     'http://localhost:80',
     'http://127.0.0.1:80',
-    'null'
+    'null' // Allows file:// development pages that send Origin: null.
 ];
 
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
