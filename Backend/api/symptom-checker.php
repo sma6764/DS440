@@ -1,43 +1,9 @@
 <?php
 require_once '../config/cors.php';
+require_once '../config/env.php';
 
 // ── Gemini API Configuration ─────────────────────────────────────────────────
-// API key is loaded from environment (do not hardcode secrets in source control).
-// Example: setx GEMINI_API_KEY "your_key_here"  (new terminal/session required)
-function resolveGeminiApiKey(): string {
-    $candidates = [
-        getenv('GEMINI_API_KEY') ?: null,
-        $_ENV['GEMINI_API_KEY'] ?? null,
-        $_SERVER['GEMINI_API_KEY'] ?? null
-    ];
-
-    foreach ($candidates as $candidate) {
-        if (is_string($candidate) && trim($candidate) !== '') {
-            return trim($candidate);
-        }
-    }
-
-    // Optional local override file for development on Windows/Apache.
-    // File format options:
-    // 1) return 'your-key';
-    // 2) return ['GEMINI_API_KEY' => 'your-key'];
-    $localPath = __DIR__ . '/../config/gemini.local.php';
-    if (is_file($localPath)) {
-        $localValue = include $localPath;
-
-        if (is_string($localValue) && trim($localValue) !== '') {
-            return trim($localValue);
-        }
-
-        if (is_array($localValue) && !empty($localValue['GEMINI_API_KEY']) && is_string($localValue['GEMINI_API_KEY'])) {
-            return trim($localValue['GEMINI_API_KEY']);
-        }
-    }
-
-    return '';
-}
-
-define('GEMINI_API_KEY', resolveGeminiApiKey());
+define('GEMINI_API_KEY', $_ENV['GEMINI_API_KEY'] ?? '');
 define('GEMINI_MODEL',   'gemini-2.0-flash');
 define('GEMINI_FALLBACK_MODELS', [
     'gemini-2.0-flash',

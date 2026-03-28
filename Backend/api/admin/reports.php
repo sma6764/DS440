@@ -27,24 +27,27 @@ function reportResponse($fileName, $columns, $rows) {
 if ($type === 'monthly-appointments') {
     $sql = "
         SELECT
-            DATE_FORMAT(appointment_date, '%Y-%m') AS month,
+            DATE(appointment_date) AS appointment_day,
             COUNT(*) AS total_appointments,
             SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
+            SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
             SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,
             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
         FROM appointments
-        GROUP BY DATE_FORMAT(appointment_date, '%Y-%m')
-        ORDER BY month DESC
-        LIMIT 12
+        WHERE YEAR(appointment_date) = YEAR(CURDATE())
+          AND MONTH(appointment_date) = MONTH(CURDATE())
+        GROUP BY DATE(appointment_date)
+        ORDER BY appointment_day ASC
     ";
 
     $result = $conn->query($sql);
     $rows = [];
     while ($row = $result->fetch_assoc()) {
         $rows[] = [
-            $row['month'],
+            $row['appointment_day'],
             (int)$row['total_appointments'],
             (int)$row['completed'],
+            (int)$row['confirmed'],
             (int)$row['cancelled'],
             (int)$row['pending']
         ];
@@ -53,7 +56,7 @@ if ($type === 'monthly-appointments') {
     $conn->close();
     reportResponse(
         'monthly_appointments_report.csv',
-        ['Month', 'Total Appointments', 'Completed', 'Cancelled', 'Pending'],
+        ['Date', 'Total Appointments', 'Completed', 'Confirmed', 'Cancelled', 'Pending'],
         $rows
     );
 }
@@ -63,14 +66,17 @@ if ($type === 'doctor-performance') {
         SELECT
             u.full_name AS doctor_name,
             s.name AS specialty,
+            b.name AS branch,
             COUNT(a.id) AS total_appointments,
-            ROUND(100 * SUM(CASE WHEN a.status = 'completed' THEN 1 ELSE 0 END) / NULLIF(COUNT(a.id), 0), 1) AS completion_rate,
-            d.rating AS average_rating
+            SUM(CASE WHEN a.status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed_count,
+            SUM(CASE WHEN a.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count,
+            ROUND(100 * SUM(CASE WHEN a.status = 'confirmed' THEN 1 ELSE 0 END) / NULLIF(COUNT(a.id), 0), 1) AS completion_rate
         FROM doctors d
         JOIN users u ON d.user_id = u.id
         JOIN specialists s ON d.specialist_id = s.id
+        JOIN branches b ON d.branch_id = b.id
         LEFT JOIN appointments a ON a.doctor_id = d.id
-        GROUP BY d.id, u.full_name, s.name, d.rating
+        GROUP BY d.id, u.full_name, s.name, b.name
         ORDER BY total_appointments DESC, u.full_name ASC
     ";
 
@@ -80,16 +86,18 @@ if ($type === 'doctor-performance') {
         $rows[] = [
             $row['doctor_name'],
             $row['specialty'],
+            $row['branch'],
             (int)$row['total_appointments'],
-            ($row['completion_rate'] === null ? 0 : (float)$row['completion_rate']) . '%',
-            (float)$row['average_rating']
+            (int)$row['confirmed_count'],
+            (int)$row['cancelled_count'],
+            ($row['completion_rate'] === null ? 0 : (float)$row['completion_rate']) . '%'
         ];
     }
 
     $conn->close();
     reportResponse(
         'doctor_performance_report.csv',
-        ['Doctor Name', 'Specialty', 'Total Appointments', 'Completion Rate', 'Average Rating'],
+        ['Doctor Name', 'Specialty', 'Branch', 'Total Appointments', 'Confirmed', 'Cancelled', 'Completion Rate %'],
         $rows
     );
 }
