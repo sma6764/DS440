@@ -55,7 +55,7 @@
             <span class="nav-icon">⚙️</span>
             <span class="nav-label">Settings</span>
           </a>
-          <a href="logout.html" class="nav-item logout">
+          <a href="logout.html" class="nav-item logout" data-action="logout">
             <span class="nav-icon">🚪</span>
             <span class="nav-label">Logout</span>
           </a>
@@ -63,9 +63,9 @@
       </nav>
 
       <div class="sidebar-user-card">
-        <div class="user-avatar">JS</div>
-        <h4 class="user-name">Dr. James Smith</h4>
-        <p class="user-role">Doctor</p>
+        <div class="user-avatar">--</div>
+        <h4 class="user-name">Loading doctor...</h4>
+        <p class="user-role">Specialty</p>
         <div class="online-indicator"></div>
       </div>
     </aside>
@@ -75,17 +75,18 @@
       <!-- Top Header Bar -->
       <header class="dashboard-header">
         <div class="header-left">
-          <h1 class="header-greeting">Good Morning, Dr. James Smith!</h1>
-          <p class="header-subtitle" id="header-subtitle">You have 5 appointments today</p>
+          <h1 class="header-greeting">Loading dashboard...</h1>
+          <p class="header-subtitle" id="header-subtitle">Please wait</p>
         </div>
 
         <div class="header-right">
           <button class="header-icon-btn" title="Settings">⚙️</button>
           <button class="header-icon-btn notification-btn" title="Notifications">
             🔔
-            <span class="notification-badge" id="notification-badge">3</span>
+            <span class="notification-badge" id="notification-badge">0</span>
           </button>
-          <div class="header-avatar">JS</div>
+          <div class="header-avatar">--</div>
+          <span class="header-user-name">Loading doctor...</span>
         </div>
       </header>
 
@@ -109,7 +110,7 @@
                   <div class="chart-bar" style="height: 70%;"></div>
                   <div class="chart-bar" style="height: 50%;"></div>
                 </div>
-                <a href="#" class="stat-link">→</a>
+                <a href="#" class="stat-link" data-section="appointments">→</a>
               </div>
 
               <div class="stat-card">
@@ -137,7 +138,18 @@
                   <div class="chart-bar" style="height: 60%;"></div>
                   <div class="chart-bar" style="height: 35%;"></div>
                 </div>
-                <a href="#" class="stat-link">→</a>
+                <a href="#" class="stat-link" data-section="appointments" data-status-filter="pending">→</a>
+              </div>
+            </div>
+
+            <div class="table-card doctor-overview-shortcuts" style="margin-bottom: 1rem;">
+              <div class="table-header-section" style="align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <h3>Quick Actions</h3>
+                <div class="table-controls overview-shortcuts-grid" style="margin-left: auto; flex-wrap: wrap;">
+                  <button type="button" class="btn-small overview-shortcut" data-section="schedule">View Today's Schedule</button>
+                  <button type="button" class="btn-small overview-shortcut" data-section="schedule">Update Availability</button>
+                  <button type="button" class="btn-small overview-shortcut" data-section="patients">View Recent Patients</button>
+                </div>
               </div>
             </div>
 
@@ -282,6 +294,23 @@
         <section class="content-section" id="appointments">
           <div class="section-container">
             <h2 class="section-title">My Appointments</h2>
+
+            <div class="table-card" style="margin-bottom: 1rem;">
+              <div class="table-header-section" style="gap: 0.75rem; flex-wrap: wrap;">
+                <h3>Filters</h3>
+                <div class="table-controls" style="margin-left: auto; flex-wrap: wrap;">
+                  <select id="doctor-status-filter" class="sort-dropdown">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                  <input id="doctor-date-from" type="date" class="sort-dropdown" aria-label="Filter from date">
+                  <input id="doctor-date-to" type="date" class="sort-dropdown" aria-label="Filter to date">
+                </div>
+              </div>
+            </div>
             
             <div class="table-card">
               <div class="table-wrapper">
@@ -292,6 +321,7 @@
                       <th>Date</th>
                       <th>Time</th>
                       <th>Specialty</th>
+                      <th>Branch</th>
                       <th>Status</th>
                       <th>Action</th>
                     </tr>
@@ -302,6 +332,7 @@
                       <td>Mar 22, 2026</td>
                       <td>10:00 AM</td>
                       <td>General Checkup</td>
+                      <td>Philadelphia Main</td>
                       <td><span class="badge badge-confirmed">Confirmed</span></td>
                       <td><button class="btn-small">View</button></td>
                     </tr>
@@ -316,40 +347,18 @@
         <section class="content-section" id="patients">
           <div class="section-container">
             <h2 class="section-title">My Patients</h2>
-            
-            <div class="table-card">
-              <div class="table-wrapper">
-                <table class="patients-table">
-                  <thead>
-                    <tr>
-                      <th>Patient Name</th>
-                      <th>ID</th>
-                      <th>Insurance</th>
-                      <th>Last Visit</th>
-                      <th>Phone</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="patients-tbody">
-                    <tr>
-                      <td>
-                        <div class="patient-cell">
-                          <div class="patient-avatar">SA</div>
-                          <div class="patient-info">
-                            <div class="patient-name">Sarah Anderson</div>
-                            <div class="patient-age">28 years</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>P-00145</td>
-                      <td>Blue Cross Blue Shield</td>
-                      <td>Mar 18, 2026</td>
-                      <td>+1 (215) 555-0145</td>
-                      <td><button class="btn-small">View Profile</button></td>
-                    </tr>
-                  </tbody>
-                </table>
+
+            <div class="table-card" style="margin-bottom: 1rem;">
+              <div class="table-header-section" style="gap: 0.75rem; flex-wrap: wrap;">
+                <h3>Patient Search</h3>
+                <div class="table-controls" style="margin-left: auto; width: min(420px, 100%);">
+                  <input id="doctor-patients-search" type="search" class="search-input" placeholder="Search patients by name" aria-label="Search patients by name" style="width: 100%;">
+                </div>
               </div>
+            </div>
+            
+            <div class="table-card" style="padding: 1rem;">
+              <div id="patients-grid" class="patients-grid" aria-live="polite"></div>
             </div>
           </div>
         </section>
@@ -358,6 +367,16 @@
         <section class="content-section" id="schedule">
           <div class="section-container">
             <h2 class="section-title">Weekly Schedule</h2>
+
+            <div class="table-card" style="margin-bottom: 1rem;">
+              <div class="table-header-section" style="align-items: center;">
+                <h3 id="doctor-week-range-label">This Week</h3>
+                <div class="table-controls" style="margin-left: auto;">
+                  <button id="doctor-week-prev" class="btn-small" type="button" aria-label="Previous week">← Previous Week</button>
+                  <button id="doctor-week-next" class="btn-small" type="button" aria-label="Next week">Next Week →</button>
+                </div>
+              </div>
+            </div>
             
             <div class="schedule-card">
               <div class="schedule-timeline" id="schedule-timeline">
@@ -421,8 +440,26 @@
 
   <a href="index.html" class="back-home-btn">Back to Main Page</a>
 
+  <div id="patient-profile-modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem; width: min(92vw, 480px); box-shadow: 0 14px 36px rgba(0,0,0,0.35); position: relative;">
+      <button id="patient-profile-modal-close" type="button" aria-label="Close profile popup" style="position: absolute; right: 12px; top: 8px; background: transparent; border: none; font-size: 22px; color: var(--text-secondary); cursor: pointer;">✕</button>
+      <h3 style="margin-top: 0; margin-right: 24px;">Patient Profile</h3>
+      <div id="patient-profile-modal-body" style="color: var(--text-secondary);"></div>
+    </div>
+  </div>
+
+  <div id="schedule-appointment-modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem; width: min(92vw, 420px); box-shadow: 0 14px 36px rgba(0,0,0,0.35);">
+      <h3 style="margin-top: 0;">Appointment Details</h3>
+      <div id="schedule-appointment-modal-body" style="color: var(--text-secondary);"></div>
+      <div style="text-align:right; margin-top: 1rem;">
+        <button id="schedule-appointment-modal-close" class="btn-small" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/back-home.js"></script>
   <script src="../js/navbar.js"></script>
-  <script src="../js/dashboard.js?v=20260315"></script>
+  <script src="../js/dashboard.js?v=20260328"></script>
 </body>
 </html>

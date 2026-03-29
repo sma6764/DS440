@@ -399,6 +399,14 @@ body {
   right: 16px;
 }
 
+.doctor-overview-shortcuts .table-header-section {
+  padding: 16px 20px;
+}
+
+.overview-shortcuts-grid {
+  gap: 10px;
+}
+
 /* Content Row */
 .content-row {
   display: grid;
@@ -776,6 +784,78 @@ body {
 
 .appointment-block:hover {
   transform: scale(1.05);
+}
+
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.patient-card {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.patient-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.patient-card-meta {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.doctor-empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.doctor-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.doctor-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: doctorShimmer 1.2s ease-in-out infinite;
+}
+
+.schedule-empty-slot {
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  background: rgba(148, 163, 184, 0.06);
+  margin-bottom: 8px;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+@keyframes doctorShimmer {
+  0% { left: -150%; }
+  100% { left: 150%; }
 }
 
 /* Responsive */

@@ -10,8 +10,42 @@ if (!window.API_BASE) {
   window.API_BASE = 'http://localhost/check-me-up/backend/api';
 }
 
-function updateNavbarAuthState() {
-  // Check if user is logged in from localStorage
+function clearAuthLocalStorage() {
+  localStorage.removeItem('checkmeup_user');
+  localStorage.removeItem('checkmeup_role');
+  localStorage.removeItem('user_role');
+}
+
+function renderLoggedOutNavbarState(navbar, navLinks) {
+  const dynamicAuthSelectors = [
+    'a[href="profile.html"]',
+    'a[href="doctor-dashboard.html"]',
+    'a[href="admin-dashboard.html"]',
+    'a[href="logout.html"]'
+  ];
+
+  dynamicAuthSelectors.forEach((selector) => {
+    navLinks.querySelectorAll(selector).forEach((element) => element.remove());
+  });
+
+  navLinks.querySelectorAll('span').forEach((element) => {
+    if (element.textContent && element.textContent.trim().startsWith('Hi,')) {
+      element.remove();
+    }
+  });
+
+  let loginButton = navbar.querySelector('a[href="login.html"]');
+  if (!loginButton) {
+    loginButton = document.createElement('a');
+    loginButton.href = 'login.html';
+    loginButton.textContent = 'Login';
+    loginButton.className = 'btn-primary';
+    navLinks.appendChild(loginButton);
+  }
+}
+
+async function updateNavbarAuthState() {
+  // Read local user data, but validate login status from the active server session.
   const userDataStr = localStorage.getItem('checkmeup_user');
   const role = localStorage.getItem('checkmeup_role');
   
@@ -23,6 +57,29 @@ function updateNavbarAuthState() {
   if (!navLinks) return;
 
   ensureNavbarCtas(navLinks);
+
+  let sessionActive = false;
+  try {
+    const sessionResponse = await fetch(`${API_BASE}/auth/session.php`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    const sessionData = await sessionResponse.json();
+    sessionActive = !!sessionData.success;
+  } catch (error) {
+    console.warn('Could not verify session state:', error);
+    sessionActive = false;
+  }
+
+  if (!sessionActive) {
+    clearAuthLocalStorage();
+    renderLoggedOutNavbarState(navbar, navLinks);
+    return;
+  }
   
   // Find the login button in navbar
   const loginButton = navbar.querySelector('a[href="login.html"]');

@@ -687,7 +687,11 @@ body {
 }
 
 .day-indicator.confirmed {
-  background: #22c55e;
+  background: #3b82f6;
+}
+
+.day-indicator.confirmed-blue {
+  background: #3b82f6;
 }
 
 .day-indicator.pending {
@@ -721,7 +725,7 @@ body {
 }
 
 .legend-dot.confirmed {
-  background: #22c55e;
+  background: #3b82f6;
 }
 
 .legend-dot.pending {

@@ -288,7 +288,10 @@
             
             <div class="table-card">
               <div class="table-header-section">
-                <h3>All Doctors</h3>
+                <div>
+                  <h3>All Doctors</h3>
+                  <p id="admin-doctors-count" class="table-subtitle">Showing 0 doctors</p>
+                </div>
                 <a href="admin-add-doctor.html" class="btn-primary-small">+ Add New Doctor</a>
               </div>
               <div class="table-wrapper">
@@ -413,6 +416,25 @@
         <section class="content-section" id="appointments">
           <div class="section-container">
             <h2 class="section-title">All Appointments</h2>
+
+            <div class="table-card" style="margin-bottom: 1rem;">
+              <div class="table-header-section" style="gap: 0.75rem; flex-wrap: wrap;">
+                <h3>Filters</h3>
+                <div class="table-controls" style="margin-left: auto; flex-wrap: wrap;">
+                  <select id="admin-appointment-status-filter" class="sort-dropdown" aria-label="Filter appointments by status">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                  <select id="admin-appointment-branch-filter" class="sort-dropdown" aria-label="Filter appointments by branch">
+                    <option value="all">All Branches</option>
+                  </select>
+                  <input id="admin-appointment-date-filter" type="date" class="sort-dropdown" aria-label="Filter appointments by date">
+                </div>
+              </div>
+            </div>
             
             <div class="table-card">
               <div class="table-wrapper">
@@ -450,22 +472,22 @@
               <div class="stat-card">
                 <div class="stat-icon-box">📊</div>
                 <div class="stat-label">Monthly Appointments</div>
-                <a href="#" class="stat-link">Download →</a>
+                <a href="#" class="stat-link download-btn" data-report-type="monthly-appointments">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">👨‍⚕️</div>
                 <div class="stat-label">Doctor Performance</div>
-                <a href="#" class="stat-link">Download →</a>
+                <a href="#" class="stat-link download-btn" data-report-type="doctor-performance">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">💰</div>
                 <div class="stat-label">Revenue Report</div>
-                <a href="#" class="stat-link">Download →</a>
+                <a href="#" class="stat-link download-btn" data-report-type="revenue">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">📈</div>
                 <div class="stat-label">Demographics</div>
-                <a href="#" class="stat-link">Download →</a>
+                <a href="#" class="stat-link download-btn" data-report-type="patient-demographics">Download →</a>
               </div>
             </div>
           </div>
@@ -527,6 +549,6 @@
 
   <script src="../js/back-home.js"></script>
   <script src="../js/navbar.js"></script>
-  <script src="../js/dashboard.js?v=20260315"></script>
+  <script src="../js/dashboard.js?v=20260328"></script>
 </body>
 </html>
