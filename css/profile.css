@@ -1,0 +1,265 @@
+.profile-container {
+  background: var(--color-bg);
+  padding: 92px 0 100px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.profile-sidebar {
+  position: sticky;
+  top: 84px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem;
+}
+
+.profile-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  margin: 0 auto 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border: 3px solid transparent;
+  background: linear-gradient(var(--color-bg-elevated), var(--color-bg-elevated)) padding-box,
+    var(--color-primary-gradient) border-box;
+}
+
+.profile-name {
+  text-align: center;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.profile-info {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.info-item {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.info-label {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.info-value {
+  color: var(--color-text-secondary);
+  font-size: 0.93rem;
+}
+
+.insurance-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--color-primary-gradient);
+}
+
+.btn-logout {
+  width: 100%;
+}
+
+.profile-main {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem;
+}
+
+.page-title {
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-button.active {
+  color: transparent;
+  background-image: var(--color-primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  border-color: var(--color-border-hover);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-primary-gradient);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.appointments-header {
+  margin-bottom: 0.8rem;
+}
+
+.appointments-header h2 {
+  color: var(--color-text);
+  margin-bottom: 0.2rem;
+}
+
+.appointments-count {
+  color: var(--color-text-muted);
+}
+
+.cancel-message {
+  min-height: 1.1rem;
+  margin-bottom: 0.65rem;
+  color: var(--color-text-secondary);
+}
+
+.table-wrapper {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.appointments-table td {
+  color: var(--color-text-secondary);
+}
+
+.appointments-table td:first-child,
+.appointments-table td:nth-child(2) {
+  color: var(--color-text);
+}
+
+.btn-cancel,
+.btn-book-again {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background: rgba(239,68,68,0.15);
+  color: #EF4444;
+  border-color: rgba(239,68,68,0.3);
+}
+
+.btn-book-again {
+  background: rgba(79,142,247,0.15);
+  color: #4F8EF7;
+  border-color: rgba(79,142,247,0.3);
+}
+
+#upcomingAppointments td[colspan],
+#pastAppointments td[colspan] {
+  color: var(--color-text-muted) !important;
+  text-align: center;
+}
+
+#upcomingAppointments td[colspan]::before,
+#pastAppointments td[colspan]::before {
+  content: '📅';
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+#upcomingAppointments td[colspan] {
+  position: relative;
+}
+
+#upcomingAppointments td[colspan]::after {
+  content: 'No appointments yet';
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.info-grid-item {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.info-grid-label {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.info-grid-value {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 68rem) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 40rem) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
