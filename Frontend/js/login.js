@@ -1,18 +1,15 @@
 // Login.js - Login page functionality
 
 const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
-const MAX_FAILED_ATTEMPTS = 3;
-const LOCKOUT_SECONDS = 30;
-
-let failedAttempts = 0;
-let lockoutUntil = 0;
-let lockoutTimer = null;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+const LOCKOUT_STORAGE_KEY = 'checkmeup_login_lockout_until';
 
 document.addEventListener('DOMContentLoaded', () => {
   // checkExistingSession(); // COMMENTED OUT FOR FRONTEND DEMO
   initializePasswordToggle();
   initializeLoginForm();
   checkRegistrationSuccess();
+  checkBookingRedirectMessage();
 });
 
 // Check if user is already logged in
@@ -27,11 +24,11 @@ function checkExistingSession() {
       // User is already logged in, redirect to appropriate page
       const role = result.data.role;
       if (role === 'doctor') {
-        window.location.href = 'doctor-dashboard.html';
+        window.location.replace('doctor-dashboard.html');
       } else if (role === 'admin') {
-        window.location.href = 'admin-dashboard.html';
+        window.location.replace('admin-dashboard.html');
       } else {
-        window.location.href = 'profile.html';
+        window.location.replace('profile.html');
       }
     }
   })
@@ -70,6 +67,31 @@ function checkRegistrationSuccess() {
   }
 }
 
+function checkBookingRedirectMessage() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const bookingMessage = urlParams.get('message');
+  if (!bookingMessage) {
+    return;
+  }
+
+  const loginCard = document.querySelector('.login-card');
+  if (!loginCard) {
+    return;
+  }
+
+  const infoBanner = document.createElement('div');
+  infoBanner.className = 'success-banner fade-in';
+  infoBanner.style.backgroundColor = '#2563EB';
+  infoBanner.style.color = 'white';
+  infoBanner.style.padding = '1rem';
+  infoBanner.style.borderRadius = '0.5rem';
+  infoBanner.style.marginBottom = '1.5rem';
+  infoBanner.style.textAlign = 'center';
+  infoBanner.style.fontWeight = '600';
+  infoBanner.textContent = bookingMessage;
+  loginCard.insertBefore(infoBanner, loginCard.firstChild);
+}
+
 // Password Show/Hide Toggle
 function initializePasswordToggle() {
   const togglePassword = document.getElementById('togglePassword');
@@ -96,11 +118,20 @@ function initializeLoginForm() {
   const passwordError = document.getElementById('passwordError');
   const accountErrorBanner = document.getElementById('accountErrorBanner');
   const errorMessage = document.getElementById('errorMessage');
-  const loginButton = loginForm.querySelector('.btn-login');
 
-  if (!loginForm || !emailInput || !passwordInput || !loginButton) {
+  if (!loginForm || !emailInput || !passwordInput) {
     return;
   }
+
+  const loginButton = loginForm.querySelector('.btn-login');
+  if (!loginButton) {
+    return;
+  }
+
+  const togglePassword = document.getElementById('togglePassword');
+  const defaultButtonText = loginButton.textContent.trim() || 'Log In';
+  let lockoutUntil = Number(localStorage.getItem(LOCKOUT_STORAGE_KEY) || '0');
+  let lockoutTimer = null;
 
   const clearAllErrors = () => {
     if (emailError) emailError.textContent = '';
@@ -131,27 +162,82 @@ function initializeLoginForm() {
     passwordInput.classList.remove('shake');
   };
 
-  const setButtonBusyState = (isBusy, label) => {
-    if (isBusy) {
-      loginButton.classList.add('btn-loading');
-      loginButton.disabled = true;
-      return;
-    }
+  const setControlsDisabled = (disabled) => {
+    loginForm.querySelectorAll('input, button').forEach((element) => {
+      element.disabled = disabled;
+    });
 
-    loginButton.classList.remove('btn-loading');
-    loginButton.textContent = label;
-
-    if (Date.now() < lockoutUntil) {
-      loginButton.disabled = true;
-    } else {
-      loginButton.disabled = false;
+    if (togglePassword) {
+      togglePassword.style.pointerEvents = disabled ? 'none' : '';
+      togglePassword.style.opacity = disabled ? '0.5' : '';
     }
   };
 
-  const showBannerError = (message) => {
-    if (!accountErrorBanner) return;
-    accountErrorBanner.textContent = message;
-    accountErrorBanner.classList.add('visible');
+  const formatCountdown = (remainingSeconds) => {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  };
+
+  const clearLockout = () => {
+    lockoutUntil = 0;
+    localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+
+    if (lockoutTimer) {
+      clearInterval(lockoutTimer);
+      lockoutTimer = null;
+    }
+
+    setControlsDisabled(false);
+    loginButton.classList.remove('btn-loading');
+    loginButton.textContent = defaultButtonText;
+
+    if (accountErrorBanner) {
+      accountErrorBanner.textContent = '';
+      accountErrorBanner.classList.remove('visible');
+    }
+  };
+
+  const startLockout = (untilTimestamp) => {
+    lockoutUntil = untilTimestamp;
+    localStorage.setItem(LOCKOUT_STORAGE_KEY, String(untilTimestamp));
+    setControlsDisabled(true);
+    loginButton.classList.remove('btn-loading');
+
+    if (lockoutTimer) {
+      clearInterval(lockoutTimer);
+    }
+
+    const updateLockoutState = () => {
+      const remainingSeconds = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000));
+
+      if (remainingSeconds <= 0) {
+        clearLockout();
+        return;
+      }
+
+      loginButton.textContent = `Locked ${formatCountdown(remainingSeconds)}`;
+
+      if (accountErrorBanner) {
+        accountErrorBanner.textContent = `Too many failed attempts. Please wait ${formatCountdown(remainingSeconds)} before trying again.`;
+        accountErrorBanner.classList.add('visible');
+      }
+
+      if (errorMessage) {
+        errorMessage.textContent = '';
+      }
+    };
+
+    updateLockoutState();
+    lockoutTimer = setInterval(updateLockoutState, 1000);
+  };
+
+  const restoreLockoutState = () => {
+    if (lockoutUntil > Date.now()) {
+      startLockout(lockoutUntil);
+    } else {
+      clearLockout();
+    }
   };
 
   const triggerPasswordShake = () => {
@@ -161,57 +247,22 @@ function initializeLoginForm() {
     passwordInput.classList.add('shake');
   };
 
-  const setLockoutState = () => {
-    lockoutUntil = Date.now() + LOCKOUT_SECONDS * 1000;
-    loginButton.classList.remove('btn-loading');
-    loginButton.disabled = true;
-
-    const updateLockoutMessage = () => {
-      const remainingSeconds = Math.max(0, Math.ceil((lockoutUntil - Date.now()) / 1000));
-      if (errorMessage) {
-        if (remainingSeconds > 0) {
-          errorMessage.textContent = `Too many failed attempts. Please wait ${remainingSeconds} seconds.`;
-        } else {
-          errorMessage.textContent = '';
-        }
-      }
-
-      if (remainingSeconds <= 0) {
-        clearInterval(lockoutTimer);
-        lockoutTimer = null;
-        failedAttempts = 0;
-        lockoutUntil = 0;
-        loginButton.disabled = false;
-      }
-    };
-
-    updateLockoutMessage();
-    if (lockoutTimer) {
-      clearInterval(lockoutTimer);
-    }
-    lockoutTimer = setInterval(updateLockoutMessage, 1000);
-  };
-
-  const handleLoginFailure = (code, fallbackMessage, emailValue, passwordValue) => {
+  const handleLoginFailure = (code, fallbackMessage) => {
     switch (code) {
-      case 'EMAIL_NOT_FOUND':
-        if (emailError) emailError.textContent = 'No account found with this email.';
-        failedAttempts += 1;
+      case 'RATE_LIMITED':
+        startLockout(Date.now() + LOCKOUT_DURATION_MS);
         break;
-      case 'WRONG_PASSWORD':
-        if (passwordError) passwordError.textContent = 'Incorrect password. Please try again.';
+      case 'INVALID_CREDENTIALS':
+        if (errorMessage) {
+          errorMessage.textContent = fallbackMessage || 'Invalid email or password.';
+        }
         triggerPasswordShake();
-        failedAttempts += 1;
-        break;
-      case 'ACCOUNT_INACTIVE':
-        showBannerError('Your account has been deactivated. Contact support at hello@checkmeup.com');
-        failedAttempts += 1;
         break;
       case 'MISSING_FIELDS':
-        if (!emailValue && emailError) {
+        if (emailError) {
           emailError.textContent = 'Please enter your email.';
         }
-        if (!passwordValue && passwordError) {
+        if (passwordError) {
           passwordError.textContent = 'Please enter your password.';
         }
         break;
@@ -219,26 +270,19 @@ function initializeLoginForm() {
         if (errorMessage) {
           errorMessage.textContent = fallbackMessage || 'Login failed. Please try again.';
         }
-        failedAttempts += 1;
         break;
-    }
-
-    if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
-      setLockoutState();
     }
   };
 
   emailInput.addEventListener('input', clearEmailError);
   passwordInput.addEventListener('input', clearPasswordError);
 
+  restoreLockoutState();
+
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     if (Date.now() < lockoutUntil) {
-      if (errorMessage) {
-        const remaining = Math.max(1, Math.ceil((lockoutUntil - Date.now()) / 1000));
-        errorMessage.textContent = `Too many failed attempts. Please wait ${remaining} seconds.`;
-      }
       return;
     }
 
@@ -270,7 +314,9 @@ function initializeLoginForm() {
 
     // Show loading state
     const originalText = loginButton.textContent;
-    setButtonBusyState(true, originalText);
+    loginButton.classList.add('btn-loading');
+    loginButton.disabled = true;
+    loginButton.textContent = 'Signing in...';
 
     try {
       const response = await fetch(`${API_BASE}/auth/login.php`, {
@@ -295,30 +341,34 @@ function initializeLoginForm() {
       const success = Boolean(payload?.success) && response.ok;
 
       if (success) {
-        failedAttempts = 0;
+        clearLockout();
 
         localStorage.setItem('checkmeup_user', JSON.stringify(payload.data));
         localStorage.setItem('checkmeup_role', payload.data.role);
 
         const role = payload.data.role;
         if (role === 'doctor') {
-          window.location.href = 'doctor-dashboard.html';
+          window.location.replace('doctor-dashboard.html');
         } else if (role === 'admin') {
-          window.location.href = 'admin-dashboard.html';
+          window.location.replace('admin-dashboard.html');
         } else {
-          window.location.href = 'profile.html';
+          window.location.replace('profile.html');
         }
         return;
       }
 
-      handleLoginFailure(payload?.code, payload?.message || 'Login failed. Please try again.', email, password);
+      handleLoginFailure(payload?.code, payload?.message || 'Login failed. Please try again.');
     } catch (error) {
       console.error('Login error:', error);
       if (errorMessage) {
         errorMessage.textContent = 'Could not connect to server. Please make sure the app is running.';
       }
     } finally {
-      setButtonBusyState(false, originalText);
+      if (Date.now() >= lockoutUntil) {
+        loginButton.classList.remove('btn-loading');
+        loginButton.disabled = false;
+        loginButton.textContent = originalText;
+      }
     }
   });
 }

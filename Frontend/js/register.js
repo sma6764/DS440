@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // checkExistingSession(); // COMMENTED OUT FOR FRONTEND DEMO
   initializePasswordStrength();
   initializePasswordMatch();
+  initializePhoneSanitizer();
   initializeRegistrationForm();
 });
 
@@ -78,6 +79,21 @@ function calculatePasswordStrength(password) {
   return 'weak';
 }
 
+function initializePhoneSanitizer() {
+  const phoneInput = document.getElementById('phone');
+  if (!phoneInput || phoneInput.dataset.phoneSanitized === '1') {
+    return;
+  }
+
+  phoneInput.dataset.phoneSanitized = '1';
+  phoneInput.addEventListener('input', () => {
+    const sanitizedValue = String(phoneInput.value || '').replace(/[^0-9+\s\-()+]/g, '');
+    if (sanitizedValue !== phoneInput.value) {
+      phoneInput.value = sanitizedValue;
+    }
+  });
+}
+
 // Confirm Password Match Checker
 function initializePasswordMatch() {
   const passwordInput = document.getElementById('password');
@@ -147,6 +163,12 @@ function initializeRegistrationForm() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       errorMessage.textContent = 'Please enter a valid email address';
+      return;
+    }
+
+    const phoneRegex = /^[0-9+\s\-()+]{7,20}$/;
+    if (!phoneRegex.test(phone)) {
+      errorMessage.textContent = 'Phone number can only contain numbers, spaces, +, parentheses, and dashes';
       return;
     }
 

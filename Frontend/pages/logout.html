@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="../js/theme-bootstrap.js"></script>
   <title>Logged Out - Check-me-up</title>
   <link rel="stylesheet" href="../css/global.css">
 </head>
@@ -13,7 +17,6 @@
       <div class="logo">Check-me-up</div>
       <div class="nav-links">
         <a href="index.html">Home</a>
-        <a href="index.html#how-it-works">How it Works</a>
         <a href="insurance.html">Insurance</a>
         <a href="contact.html">Contact Us</a>
         <a href="symptom-checker.html" class="btn-secondary nav-cta nav-cta-check">🩺 Check Symptoms</a>
@@ -106,10 +109,7 @@
     });
 
     // Clear localStorage
-    localStorage.removeItem('checkmeup_user');
-    localStorage.removeItem('checkmeup_role');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('checkmeup_role');
+    localStorage.clear();
 
     // Start countdown timer
     let timeLeft = 10;
@@ -121,7 +121,7 @@
       
       if (timeLeft <= 0) {
         clearInterval(timer);
-        window.location.href = 'index.html';
+        window.location.replace('index.html');
       }
     }, 1000);
   </script>

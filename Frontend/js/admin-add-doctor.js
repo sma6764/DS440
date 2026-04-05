@@ -27,6 +27,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeDoctorForm(form);
 });
 
+function initializePhoneSanitizer(form) {
+  const phoneInput = form.querySelector('#phone');
+  if (!phoneInput || phoneInput.dataset.phoneSanitized === '1') {
+    return;
+  }
+
+  phoneInput.dataset.phoneSanitized = '1';
+  phoneInput.addEventListener('input', () => {
+    const sanitizedValue = String(phoneInput.value || '').replace(/[^0-9+\s\-()+]/g, '');
+    if (sanitizedValue !== phoneInput.value) {
+      phoneInput.value = sanitizedValue;
+    }
+  });
+}
+
 function checkAdminSession() {
   const role = ADMIN_KEYS.map((key) => localStorage.getItem(key)).find(Boolean);
 
@@ -60,6 +75,8 @@ function configureFormForMode(form) {
     confirmInput.required = false;
     confirmInput.placeholder = 'Leave blank to keep current password';
   }
+
+  initializePhoneSanitizer(form);
 }
 
 function initializeDoctorForm(form) {
@@ -79,8 +96,7 @@ function initializeDoctorForm(form) {
       gender: String(formData.get('gender') || '').trim(),
       specialist_id: Number(formData.get('specialist_id')),
       branch_id: Number(formData.get('branch_id')),
-      bio: String(formData.get('bio') || '').trim(),
-      rating: Number(formData.get('rating'))
+      bio: String(formData.get('bio') || '').trim()
     };
 
     const validationError = validateDoctorPayload(payload, isEditMode);
@@ -159,8 +175,9 @@ function validateDoctorPayload(payload, editMode) {
     return 'Please select a branch';
   }
 
-  if (!Number.isFinite(payload.rating) || payload.rating < 0 || payload.rating > 5) {
-    return 'Rating must be between 0.0 and 5.0';
+  const phoneRegex = /^[0-9+\s\-()+]{7,20}$/;
+  if (!phoneRegex.test(payload.phone)) {
+    return 'Phone number can only contain numbers, spaces, +, parentheses, and dashes';
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -196,7 +213,6 @@ async function loadDoctorForEdit(form) {
   form.elements.specialist_id.value = String(doctor.specialist_id || '');
   form.elements.branch_id.value = String(doctor.branch_id || '');
   form.elements.bio.value = doctor.bio || '';
-  form.elements.rating.value = doctor.rating ?? '';
 }
 
 async function loadSpecialists() {

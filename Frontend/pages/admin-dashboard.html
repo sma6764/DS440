@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="../js/theme-bootstrap.js"></script>
   <title>Admin Dashboard - Check-me-up</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/admin-dashboard.css">
@@ -53,6 +57,11 @@
           <a href="#" class="nav-item" data-section="reports">
             <span class="nav-icon">📈</span>
             <span class="nav-label">Reports</span>
+          </a>
+          <a href="#" class="nav-item" data-section="messages">
+            <span class="nav-icon">📩</span>
+            <span class="nav-label">Messages</span>
+            <span class="nav-badge" id="messages-badge">0</span>
           </a>
         </div>
 
@@ -471,23 +480,66 @@
             <div class="stats-row">
               <div class="stat-card">
                 <div class="stat-icon-box">📊</div>
+                <div class="stat-value" id="monthly-appointments-report-count">--</div>
                 <div class="stat-label">Monthly Appointments</div>
+                <div class="stat-subtext" id="monthly-appointments-report-note">Loading live data...</div>
                 <a href="#" class="stat-link download-btn" data-report-type="monthly-appointments">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">👨‍⚕️</div>
+                <div class="stat-value" id="doctor-performance-report-count">--</div>
                 <div class="stat-label">Doctor Performance</div>
+                <div class="stat-subtext" id="doctor-performance-report-note">Loading live data...</div>
                 <a href="#" class="stat-link download-btn" data-report-type="doctor-performance">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">💰</div>
+                <div class="stat-value" id="revenue-report-count">--</div>
                 <div class="stat-label">Revenue Report</div>
+                <div class="stat-subtext" id="revenue-report-note">Loading live data...</div>
                 <a href="#" class="stat-link download-btn" data-report-type="revenue">Download →</a>
               </div>
               <div class="stat-card">
                 <div class="stat-icon-box">📈</div>
+                <div class="stat-value" id="patient-demographics-report-count">--</div>
                 <div class="stat-label">Demographics</div>
+                <div class="stat-subtext" id="patient-demographics-report-note">Loading live data...</div>
                 <a href="#" class="stat-link download-btn" data-report-type="patient-demographics">Download →</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Messages Section -->
+        <section class="content-section" id="messages">
+          <div class="section-container">
+            <h2 class="section-title">Contact Messages</h2>
+
+            <div class="table-card">
+              <div class="table-header-section">
+                <div>
+                  <h3>Submitted Messages</h3>
+                  <p class="table-subtitle">Latest contact form submissions</p>
+                </div>
+              </div>
+
+              <div class="table-wrapper">
+                <table class="patients-table messages-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Subject</th>
+                      <th>Message</th>
+                      <th>Date Submitted</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-messages-body">
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">Loading messages...</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -515,7 +567,6 @@
           <h4 class="footer-heading">Quick Links</h4>
           <ul class="footer-links">
             <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#how-it-works">How it Works</a></li>
             <li><a href="insurance.html">Insurance</a></li>
             <li><a href="booking.html">Book Now</a></li>
             <li><a href="symptom-checker.html">Check My Symptoms</a></li>

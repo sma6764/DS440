@@ -9,14 +9,45 @@ let adminAppointmentsByDate = {};
 let adminCalendarPopupElement = null;
 let headerControlsInitialized = false;
 let activeHeaderDropdown = null;
+let notificationRefreshTimer = null;
 
 const adminDashboardState = {
   appointments: [],
+  doctors: [],
   filtersBound: false
 };
 
+const adminMessagesState = {
+  items: [],
+  loading: false
+};
+
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  silentlyAutoCompleteAppointments();
+
+  const sessionData = await verifyDashboardSession();
+  if (!sessionData) {
+    return;
+  }
+
+  const currentPage = window.location.pathname;
+  const isDoctorDashboard = currentPage.includes('doctor-dashboard');
+  const isAdminDashboard = currentPage.includes('admin-dashboard');
+  const role = sessionData.data ? sessionData.data.user_role : null;
+
+  if (isDoctorDashboard && role !== 'doctor') {
+    localStorage.clear();
+    window.location.replace('login.html');
+    return;
+  }
+
+  if (isAdminDashboard && role !== 'admin') {
+    localStorage.clear();
+    window.location.replace('login.html');
+    return;
+  }
+
   initializeHeaderControls();
 
   if (isDoctorDashboardPage()) {
@@ -33,8 +64,38 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeCalendarWidget();
   initializeDateNavigation();
   addSectionTransitions();
-  checkDashboardAccess();
+  checkDashboardAccess(sessionData);
 });
+
+async function verifyDashboardSession() {
+  try {
+    const response = await fetch(`${API_BASE}/auth/session.php`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    const result = await response.json().catch(() => ({ success: false }));
+    if (!result.success) {
+      localStorage.clear();
+      window.location.replace('login.html');
+      return null;
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Session check error:', error);
+    localStorage.clear();
+    window.location.replace('login.html');
+    return null;
+  }
+}
+
+function silentlyAutoCompleteAppointments() {
+  fetch(`${API_BASE}/appointments/auto-complete.php`, {
+    method: 'GET',
+    credentials: 'include'
+  }).catch(() => {});
+}
 
 function isDoctorDashboardPage() {
   return window.location.pathname.includes('doctor-dashboard');
@@ -56,6 +117,129 @@ function switchSectionViaNav(sectionId) {
   nav.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function truncateText(value, maxLength = 60) {
+  const text = String(value ?? '');
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}...`;
+}
+
+function formatAdminDateTime(value) {
+  if (!value) return 'N/A';
+  const normalized = String(value).replace(' ', 'T');
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
+function updateMessagesBadge(count) {
+  const badge = document.getElementById('messages-badge');
+  if (!badge) return;
+  badge.textContent = String(Number(count) || 0);
+}
+
+function bindAdminMessageToggleEvents() {
+  const tbody = document.getElementById('admin-messages-body');
+  if (!tbody || tbody.dataset.bound === '1') return;
+
+  tbody.dataset.bound = '1';
+  tbody.addEventListener('click', (event) => {
+    const button = event.target.closest('.message-toggle-btn');
+    if (!button) return;
+
+    const preview = button.closest('.message-preview');
+    if (!preview) return;
+
+    const isExpanded = preview.dataset.expanded === '1';
+    const truncated = preview.querySelector('.message-preview-text');
+    const fullText = preview.querySelector('.message-full-text');
+
+    if (isExpanded) {
+      preview.dataset.expanded = '0';
+      if (truncated) truncated.hidden = false;
+      if (fullText) fullText.hidden = true;
+      button.textContent = 'Read more';
+    } else {
+      preview.dataset.expanded = '1';
+      if (truncated) truncated.hidden = true;
+      if (fullText) fullText.hidden = false;
+      button.textContent = 'Show less';
+    }
+  });
+}
+
+function renderAdminMessages(messages) {
+  const tbody = document.getElementById('admin-messages-body');
+  if (!tbody) return;
+
+  bindAdminMessageToggleEvents();
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">No messages yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = messages.map((message) => {
+    const fullMessage = String(message.message || '');
+    const shouldTruncate = fullMessage.length > 60;
+    const truncatedMessage = shouldTruncate ? truncateText(fullMessage, 60) : fullMessage;
+
+    return `
+      <tr>
+        <td>${escapeHtml(message.full_name || 'N/A')}</td>
+        <td>${escapeHtml(message.email || 'N/A')}</td>
+        <td>${escapeHtml(message.subject || 'N/A')}</td>
+        <td class="message-cell">
+          <div class="message-preview" data-expanded="0">
+            <span class="message-preview-text">${escapeHtml(truncatedMessage)}</span>
+            <span class="message-full-text" hidden>${escapeHtml(fullMessage)}</span>
+            ${shouldTruncate ? '<button type="button" class="message-toggle-btn">Read more</button>' : ''}
+          </div>
+        </td>
+        <td class="message-date">${escapeHtml(formatAdminDateTime(message.submitted_at))}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function loadAdminMessages() {
+  const tbody = document.getElementById('admin-messages-body');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#6B7280;">Loading messages...</td></tr>';
+  }
+
+  try {
+    const result = await fetchJson(`${API_BASE}/admin/messages.php`);
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to load messages');
+    }
+
+    const messages = Array.isArray(result.data) ? result.data : [];
+    adminMessagesState.items = messages;
+    updateMessagesBadge(messages.length);
+    renderAdminMessages(messages);
+  } catch (error) {
+    console.error('Error loading admin messages:', error);
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:#EF4444;">Could not load messages</td></tr>';
+    }
+  }
+}
+
 async function performDashboardLogout() {
   localStorage.removeItem('checkmeup_user');
   localStorage.removeItem('checkmeup_role');
@@ -70,7 +254,7 @@ async function performDashboardLogout() {
     console.warn('Logout request failed:', error);
   }
 
-  window.location.href = 'index.html';
+  window.location.replace('index.html');
 }
 
 function ensureHeaderModal(modalId, title, bodyMarkup) {
@@ -133,7 +317,7 @@ async function fetchDashboardNotifications() {
   }
 
   if (isAdminDashboardPage()) {
-    const result = await fetchJson(`${API_BASE}/admin/appointments.php?date=today`);
+    const result = await fetchJson(`${API_BASE}/admin/appointments.php?status=pending`);
     if (!result.success) throw new Error(result.message || 'Failed to fetch notifications');
     return (result.data || []).map((item) => ({
       title: item.patient_name || 'Patient',
@@ -206,6 +390,8 @@ function initializeHeaderControls() {
   const notificationButton = headerRight.querySelector('.notification-btn');
   const badge = headerRight.querySelector('.notification-badge');
 
+  updateNotificationBadge(0, badge);
+
   const notificationPanel = document.createElement('div');
   notificationPanel.className = 'dashboard-header-dropdown header-notifications-dropdown';
   notificationPanel.style.cssText = 'display:none; position:absolute; top:44px; right:0; width:min(92vw, 340px); max-height:360px; overflow:auto; background:var(--color-bg); border:1px solid var(--color-border); border-radius:10px; box-shadow:0 14px 32px rgba(0,0,0,0.22); padding:12px; z-index:10040;';
@@ -220,6 +406,25 @@ function initializeHeaderControls() {
     <button type="button" data-settings-action="logout" style="width:100%; text-align:left; padding:10px; border:none; background:transparent; color:#EF4444; border-radius:8px; cursor:pointer;">Logout</button>
   `;
   headerRight.appendChild(settingsPanel);
+
+  const doctorProfileModal = isDoctorDashboardPage()
+    ? ensureHeaderModal(
+        'doctor-edit-profile-modal',
+        'Edit Profile',
+        `
+          <form id="doctor-edit-profile-form" style="display:grid; gap:10px;">
+            <label style="display:grid; gap:4px; font-size:13px; color:var(--text-secondary);">Full Name<input name="full_name" type="text" required style="padding:8px 10px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg-secondary); color:var(--text-primary);"></label>
+            <label style="display:grid; gap:4px; font-size:13px; color:var(--text-secondary);">Phone<input name="phone" type="text" required style="padding:8px 10px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg-secondary); color:var(--text-primary);"></label>
+            <label style="display:grid; gap:4px; font-size:13px; color:var(--text-secondary);">Bio<textarea name="bio" rows="4" required style="padding:8px 10px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg-secondary); color:var(--text-primary); resize:vertical;"></textarea></label>
+            <div id="doctor-edit-profile-message" style="font-size:12px; min-height:16px;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+              <button type="button" data-close-modal="doctor-edit-profile-modal" class="btn-small">Cancel</button>
+              <button type="submit" class="btn-small">Save</button>
+            </div>
+          </form>
+        `
+      )
+    : null;
 
   const profileModal = ensureHeaderModal(
     'header-edit-profile-modal',
@@ -263,13 +468,11 @@ function initializeHeaderControls() {
 
     notificationPanel.style.display = 'block';
     activeHeaderDropdown = notificationPanel;
+    updateNotificationBadge(0, badge);
     notificationPanel.innerHTML = '<div style="color:#6B7280; font-size:13px;">Loading notifications...</div>';
 
     try {
       const items = await fetchDashboardNotifications();
-      if (badge) {
-        badge.textContent = String(items.length);
-      }
       notificationPanel.innerHTML = buildNotificationsMarkup(items);
     } catch (error) {
       notificationPanel.innerHTML = '<div style="color:#EF4444; font-size:13px;">Could not load notifications</div>';
@@ -311,6 +514,26 @@ function initializeHeaderControls() {
     }
 
     if (action === 'edit-profile') {
+      if (isDoctorDashboardPage() && doctorProfileModal) {
+        const form = doctorProfileModal.querySelector('#doctor-edit-profile-form');
+        const messageEl = doctorProfileModal.querySelector('#doctor-edit-profile-message');
+        if (messageEl) {
+          messageEl.textContent = '';
+          messageEl.style.color = 'var(--text-secondary)';
+        }
+
+        const profile = doctorDashboardState.profile || {};
+        if (form) {
+          bindPhoneSanitizer(form.elements.phone);
+          form.elements.full_name.value = profile.full_name || '';
+          form.elements.phone.value = profile.phone || '';
+          form.elements.bio.value = profile.bio || '';
+        }
+
+        doctorProfileModal.style.display = 'flex';
+        return;
+      }
+
       const form = profileModal.querySelector('#header-edit-profile-form');
       const errorEl = profileModal.querySelector('#header-edit-profile-error');
       if (errorEl) errorEl.textContent = '';
@@ -318,6 +541,7 @@ function initializeHeaderControls() {
       try {
         const result = await fetchJson(`${API_BASE}/auth/update-profile.php`, { method: 'GET' });
         if (!result.success) throw new Error(result.message || 'Could not load profile');
+        bindPhoneSanitizer(form.elements.phone);
         form.elements.full_name.value = result.data?.full_name || '';
         form.elements.email.value = result.data?.email || '';
         form.elements.phone.value = result.data?.phone || '';
@@ -350,6 +574,11 @@ function initializeHeaderControls() {
       phone: profileForm.elements.phone.value.trim()
     };
 
+    if (payload.phone && !isValidPhoneNumber(payload.phone)) {
+      if (errorEl) errorEl.textContent = 'Phone number can only contain numbers, spaces, +, parentheses, and dashes.';
+      return;
+    }
+
     const submitBtn = profileForm.querySelector('button[type="submit"]');
     const oldText = submitBtn?.textContent || 'Save';
     if (submitBtn) {
@@ -376,6 +605,96 @@ function initializeHeaderControls() {
       profileModal.style.display = 'none';
     } catch (error) {
       if (errorEl) errorEl.textContent = error.message || 'Could not update profile';
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
+      }
+    }
+  });
+
+  const doctorProfileForm = doctorProfileModal?.querySelector('#doctor-edit-profile-form');
+  doctorProfileForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const messageEl = doctorProfileModal.querySelector('#doctor-edit-profile-message');
+    if (messageEl) {
+      messageEl.textContent = '';
+    }
+
+    const payload = {
+      full_name: doctorProfileForm.elements.full_name.value.trim(),
+      phone: doctorProfileForm.elements.phone.value.trim(),
+      bio: doctorProfileForm.elements.bio.value.trim()
+    };
+
+    if (!payload.full_name || !payload.phone || !payload.bio) {
+      if (messageEl) {
+        messageEl.style.color = '#EF4444';
+        messageEl.textContent = 'Please fill in all fields.';
+      }
+      return;
+    }
+
+    if (!isValidPhoneNumber(payload.phone)) {
+      if (messageEl) {
+        messageEl.style.color = '#EF4444';
+        messageEl.textContent = 'Phone number can only contain numbers, spaces, +, parentheses, and dashes.';
+      }
+      return;
+    }
+
+    const submitBtn = doctorProfileForm.querySelector('button[type="submit"]');
+    const oldText = submitBtn?.textContent || 'Save';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+    }
+
+    try {
+      const result = await fetchJson(`${API_BASE}/doctor/update-profile.php`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!result.success) {
+        throw new Error(result.message || 'Could not update profile');
+      }
+
+      doctorDashboardState.profile = {
+        ...(doctorDashboardState.profile || {}),
+        full_name: payload.full_name,
+        phone: payload.phone,
+        bio: payload.bio
+      };
+
+      doctorIdentityCache = {
+        ...(doctorIdentityCache || {}),
+        displayName: normalizeDoctorDisplayName(payload.full_name),
+        lastName: getDoctorLastName(payload.full_name),
+        initials: getInitials(payload.full_name),
+        specialty: doctorDashboardState.profile?.specialty || doctorIdentityCache?.specialty || '',
+        branch: doctorDashboardState.profile?.branch || doctorIdentityCache?.branch || ''
+      };
+
+      renderDoctorProfileCard();
+      updateDoctorGreetingAndHeader();
+      updateHeaderUserIdentity(payload.full_name, doctorDashboardState.profile?.email || '', payload.phone);
+
+      if (messageEl) {
+        messageEl.style.color = '#10B981';
+        messageEl.textContent = 'Profile updated successfully';
+      }
+
+      setTimeout(() => {
+        doctorProfileModal.style.display = 'none';
+        if (messageEl) messageEl.textContent = '';
+      }, 900);
+    } catch (error) {
+      if (messageEl) {
+        messageEl.style.color = '#EF4444';
+        messageEl.textContent = error.message || 'Could not update profile';
+      }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -427,6 +746,15 @@ function initializeHeaderControls() {
     if (headerRight.contains(event.target)) return;
     closeHeaderDropdowns();
   });
+
+  if (notificationRefreshTimer) {
+    window.clearInterval(notificationRefreshTimer);
+  }
+  notificationRefreshTimer = window.setInterval(() => {
+    void refreshNotificationBadge(badge);
+  }, 60000);
+
+  void refreshNotificationBadge(badge);
 }
 
 const doctorDashboardState = {
@@ -491,7 +819,6 @@ function clearSectionInlineError(sectionId) {
 function updateDoctorGreetingAndHeader() {
   const greetingElement = document.querySelector('.header-greeting');
   const subtitleElement = document.getElementById('header-subtitle');
-  const notificationBadge = document.getElementById('notification-badge');
   const profile = doctorDashboardState.profile;
   const stats = doctorDashboardState.stats;
 
@@ -507,8 +834,44 @@ function updateDoctorGreetingAndHeader() {
     const count = Number(stats.today_appointments || 0);
     subtitleElement.textContent = `You have ${count} appointment${count !== 1 ? 's' : ''} today`;
   }
-  if (notificationBadge && stats) {
-    notificationBadge.textContent = String(stats.pending_confirmations || 0);
+  updateNotificationBadge(stats ? Number(stats.pending_confirmations || 0) : 0);
+}
+
+function sanitizePhoneInput(value) {
+  return String(value || '').replace(/[^0-9+\s\-()+]/g, '');
+}
+
+function isValidPhoneNumber(phone) {
+  return /^[0-9+\s\-()+]{7,20}$/.test(String(phone || '').trim());
+}
+
+function bindPhoneSanitizer(input) {
+  if (!input || input.dataset.phoneSanitized === '1') return;
+  input.dataset.phoneSanitized = '1';
+  input.addEventListener('input', () => {
+    const nextValue = sanitizePhoneInput(input.value);
+    if (nextValue !== input.value) {
+      input.value = nextValue;
+    }
+  });
+}
+
+function updateNotificationBadge(count, badgeElement = document.getElementById('notification-badge')) {
+  if (!badgeElement) return 0;
+  const normalizedCount = Math.max(0, Number(count) || 0);
+  badgeElement.textContent = String(normalizedCount);
+  badgeElement.style.display = normalizedCount > 0 ? 'inline-flex' : 'none';
+  return normalizedCount;
+}
+
+async function refreshNotificationBadge(badgeElement = document.getElementById('notification-badge')) {
+  try {
+    const items = await fetchDashboardNotifications();
+    updateNotificationBadge(items.length, badgeElement);
+    return items;
+  } catch (error) {
+    updateNotificationBadge(0, badgeElement);
+    return [];
   }
 }
 
@@ -667,6 +1030,7 @@ function renderDoctorAppointmentsTable() {
   tbody.innerHTML = rows.map((appt) => {
     const canConfirm = appt.status === 'pending';
     const canCancel = appt.status === 'pending' || appt.status === 'confirmed';
+    const statusLabel = capitalize(appt.status);
 
     return `
       <tr data-appointment-id="${appt.id}">
@@ -675,7 +1039,7 @@ function renderDoctorAppointmentsTable() {
         <td>${formatTime(appt.appointment_time)}</td>
         <td>${appt.specialty || 'N/A'}</td>
         <td>${appt.branch || 'N/A'}</td>
-        <td><span class="badge ${statusBadgeClass(appt.status)}">${capitalize(appt.status)}</span></td>
+        <td><span class="badge ${statusBadgeClass(appt.status)}">${statusLabel}</span></td>
         <td>
           <div class="appointment-actions">
             ${canConfirm ? '<button class="btn-small" data-action="confirm">Confirm</button>' : ''}
@@ -689,10 +1053,18 @@ function renderDoctorAppointmentsTable() {
 }
 
 function bindDoctorAppointmentsInteractions() {
+  const pendingShortcut = document.getElementById('doctor-pending-shortcut');
   const status = document.getElementById('doctor-status-filter');
   const from = document.getElementById('doctor-date-from');
   const to = document.getElementById('doctor-date-to');
   const tbody = document.getElementById('appointments-tbody');
+
+  pendingShortcut?.addEventListener('click', () => {
+    if (status) {
+      status.value = 'pending';
+    }
+    renderDoctorAppointmentsTable();
+  });
 
   [status, from, to].forEach((node) => {
     node?.addEventListener('input', () => {
@@ -1085,7 +1457,8 @@ async function bootstrapDoctorDashboard() {
   try {
     const sessionResult = await fetchJson(`${API_BASE}/auth/session.php`);
     if (!sessionResult.success || sessionResult.data?.user_role !== 'doctor') {
-      window.location.href = 'login.html';
+      localStorage.clear();
+      window.location.replace('login.html');
       return;
     }
 
@@ -1129,7 +1502,8 @@ async function bootstrapDoctorDashboard() {
     await loadDoctorScheduleForWeek(doctorDashboardState.currentWeekStart);
   } catch (error) {
     console.error('Doctor dashboard bootstrap failed:', error);
-    window.location.href = 'login.html';
+    localStorage.clear();
+    window.location.replace('login.html');
   }
 }
 
@@ -1180,6 +1554,8 @@ async function fetchDoctorIdentity() {
     throw new Error('No active doctor session');
   }
 
+  const sessionName = String(sessionResult.data?.name || sessionResult.data?.user_name || 'Doctor').trim();
+
   let profileData = null;
   try {
     const profileResponse = await fetch(`${API_BASE}/doctor/profile.php`, {
@@ -1194,7 +1570,7 @@ async function fetchDoctorIdentity() {
     console.warn('Could not load doctor profile details:', error);
   }
 
-  const fullName = (profileData?.full_name || sessionResult.data?.user_name || 'Doctor').trim();
+  const fullName = (profileData?.full_name || sessionName || 'Doctor').trim();
   const displayName = normalizeDoctorDisplayName(fullName);
 
   doctorIdentityCache = {
@@ -1445,42 +1821,23 @@ function loadDashboardData() {
 }
 
 // Check if user has access to current dashboard
-function checkDashboardAccess() {
+function checkDashboardAccess(sessionData = null) {
   const currentPage = window.location.pathname;
   const isDoctorDashboard = currentPage.includes('doctor-dashboard');
   const isAdminDashboard = currentPage.includes('admin-dashboard');
-  
-  // Fetch session to check role
-  fetch(`${API_BASE}/auth/session.php`, {
-    method: 'GET',
-    credentials: 'include'
-  })
-  .then(response => response.json())
-  .then(result => {
-    if (!result.success) {
-      // No session, redirect to login
-      window.location.href = 'login.html';
-      return;
-    }
-    
-    const role = result.data.user_role;
-    
-    // Check doctor dashboard access
-    if (isDoctorDashboard && role !== 'doctor') {
-      window.location.href = 'login.html';
-      return;
-    }
-    
-    // Check admin dashboard access
-    if (isAdminDashboard && role !== 'admin') {
-      window.location.href = 'login.html';
-      return;
-    }
-  })
-  .catch(error => {
-    console.error('Session check error:', error);
-    window.location.href = 'login.html';
-  });
+
+  const role = sessionData && sessionData.data ? sessionData.data.user_role : null;
+
+  if (isDoctorDashboard && role !== 'doctor') {
+    localStorage.clear();
+    window.location.replace('login.html');
+    return;
+  }
+
+  if (isAdminDashboard && role !== 'admin') {
+    localStorage.clear();
+    window.location.replace('login.html');
+  }
 }
 
 function loadAdminDashboardData() {
@@ -1489,9 +1846,12 @@ function loadAdminDashboardData() {
     fetch(`${API_BASE}/admin/doctors.php`, { method: 'GET', credentials: 'include' }).then(r => r.json()),
     fetch(`${API_BASE}/admin/patients.php`, { method: 'GET', credentials: 'include' }).then(r => r.json()),
     fetch(`${API_BASE}/branches.php`, { method: 'GET', credentials: 'include' }).then(r => r.json()),
-    fetch(`${API_BASE}/admin/appointments.php`, { method: 'GET', credentials: 'include' }).then(r => r.json())
+    fetch(`${API_BASE}/admin/appointments.php`, { method: 'GET', credentials: 'include' }).then(r => r.json()),
+    fetch(`${API_BASE}/admin/messages.php`, { method: 'GET', credentials: 'include' })
+      .then(r => r.json())
+      .catch(() => ({ success: false, data: [] }))
   ])
-    .then(([statsResult, doctorsResult, patientsResult, branchesResult, appointmentsResult]) => {
+    .then(([statsResult, doctorsResult, patientsResult, branchesResult, appointmentsResult, messagesResult]) => {
       if (!statsResult.success) throw new Error(statsResult.message || 'Failed to load stats');
       if (!doctorsResult.success) throw new Error(doctorsResult.message || 'Failed to load doctors');
       if (!patientsResult.success) throw new Error(patientsResult.message || 'Failed to load patients');
@@ -1503,7 +1863,14 @@ function loadAdminDashboardData() {
       const patients = patientsResult.data || [];
       const branches = branchesResult.data || [];
       const appointments = appointmentsResult.data || [];
+      const messages = messagesResult.success ? (messagesResult.data || []) : [];
       adminDashboardState.appointments = appointments;
+      adminDashboardState.doctors = doctors;
+      adminMessagesState.items = messages;
+      updateMessagesBadge(messages.length);
+      updateNotificationBadge(appointments.filter((appointment) => appointment.status === 'pending').length);
+
+      void initializeReportCardSummaries(stats, doctors, appointments);
 
       const statCards = document.querySelectorAll('.stat-value');
       if (statCards[0]) statCards[0].textContent = stats.total_doctors ?? 0;
@@ -1519,6 +1886,9 @@ function loadAdminDashboardData() {
       applyAdminAppointmentFilters();
       updateAdminCalendarDots(appointments);
       fetchAdminCalendarMonthAppointments(dashboardCalendarCurrentMonth);
+      if (document.getElementById('messages')?.classList.contains('active')) {
+        renderAdminMessages(messages);
+      }
 
       initializeReportDownloads();
       animateStatCards();
@@ -1526,6 +1896,81 @@ function loadAdminDashboardData() {
     .catch(error => {
       console.error('Error loading admin dashboard data:', error);
     });
+}
+
+function setReportCardSummary(key, value, note) {
+  const valueElement = document.getElementById(`${key}-report-count`);
+  const noteElement = document.getElementById(`${key}-report-note`);
+
+  if (valueElement) {
+    valueElement.textContent = value;
+  }
+
+  if (noteElement) {
+    noteElement.textContent = note;
+  }
+}
+
+function formatCurrencyAed(value) {
+  return new Intl.NumberFormat('en-AE', {
+    style: 'currency',
+    currency: 'AED',
+    maximumFractionDigits: 0
+  }).format(Number(value) || 0);
+}
+
+async function initializeReportCardSummaries(stats, doctors, appointments) {
+  const currentMonth = formatYearMonth(new Date());
+  const appointmentsThisMonth = appointments.filter((appointment) => {
+    return formatYearMonth(new Date(`${appointment.appointment_date}T00:00:00`)) === currentMonth;
+  }).length;
+
+  setReportCardSummary(
+    'monthly-appointments',
+    String(appointmentsThisMonth),
+    `${appointmentsThisMonth} appointments this month`
+  );
+
+  setReportCardSummary(
+    'doctor-performance',
+    String(doctors.length),
+    `${doctors.length} doctors included in export`
+  );
+
+  try {
+    const [revenueResult, demographicsResult] = await Promise.all([
+      fetchJson(`${API_BASE}/admin/reports.php?type=revenue`),
+      fetchJson(`${API_BASE}/admin/reports.php?type=patient-demographics`)
+    ]);
+
+    if (revenueResult.success && revenueResult.data) {
+      const rows = Array.isArray(revenueResult.data.rows) ? revenueResult.data.rows : [];
+      const currentMonthRow = rows.find((row) => row[0] === currentMonth) || rows[0] || [];
+      const estimatedRevenue = Number(currentMonthRow[1] || 0);
+      setReportCardSummary(
+        'revenue',
+        formatCurrencyAed(estimatedRevenue),
+        `Current month estimate from ${rows.length} monthly row${rows.length === 1 ? '' : 's'}`
+      );
+    } else {
+      setReportCardSummary('revenue', 'AED 0', 'Revenue data unavailable');
+    }
+
+    if (demographicsResult.success && demographicsResult.data) {
+      const rows = Array.isArray(demographicsResult.data.rows) ? demographicsResult.data.rows : [];
+      setReportCardSummary(
+        'patient-demographics',
+        String(rows.length),
+        'Age groups and gender segments exported'
+      );
+    } else {
+      setReportCardSummary('patient-demographics', '0', 'Demographics data unavailable');
+    }
+  } catch (error) {
+    console.error('Failed to load report summaries:', error);
+    setReportCardSummary('revenue', 'AED 0', 'Revenue data unavailable');
+    setReportCardSummary('patient-demographics', '0', 'Demographics data unavailable');
+  }
 }
 
 function loadDoctorDashboardData() {
@@ -1556,6 +2001,7 @@ function loadDoctorDashboardData() {
       const count = Number(data.stats?.todays_appointments ?? 0);
       subtitleElement.textContent = `You have ${count} appointment${count !== 1 ? 's' : ''} today`;
     }
+    updateNotificationBadge(data.stats?.pending_confirmations ?? 0);
 
     renderDoctorRecentPatients(data.patients?.slice(0, 5) || []);
     renderDoctorAppointments(data.appointments || []);
@@ -2333,6 +2779,8 @@ function initializeSidebarNavigation() {
       if (isAdminDashboardPage()) {
         if (sectionId === 'doctors' || sectionId === 'patients' || sectionId === 'branches' || sectionId === 'appointments' || sectionId === 'overview') {
           loadAdminDashboardData();
+        } else if (sectionId === 'messages') {
+          loadAdminMessages();
         }
       }
 
@@ -2647,13 +3095,83 @@ function initializeReportDownloads() {
           csvContent = convertRowsToCsv(columns, rows);
           fileName = `monthly_appointments_${month}.csv`;
         } else if (reportType === 'doctor-performance') {
-          const result = await fetchJson(`${API_BASE}/admin/reports.php?type=doctor-performance`);
+          const [doctorsResult, appointmentsResult] = await Promise.all([
+            fetchJson(`${API_BASE}/admin/doctors.php`),
+            fetchJson(`${API_BASE}/admin/appointments.php`)
+          ]);
+
+          if (!doctorsResult.success) {
+            throw new Error(doctorsResult.message || 'Failed to fetch doctors');
+          }
+          if (!appointmentsResult.success) {
+            throw new Error(appointmentsResult.message || 'Failed to fetch appointments');
+          }
+
+          const doctors = Array.isArray(doctorsResult.data) ? doctorsResult.data : [];
+          const appointments = Array.isArray(appointmentsResult.data) ? appointmentsResult.data : [];
+          const statsByDoctor = new Map();
+
+          doctors.forEach((doctor) => {
+            statsByDoctor.set(String(doctor.id), {
+              doctor_name: doctor.full_name || '',
+              specialty: doctor.specialty || '',
+              branch: doctor.branch || '',
+              is_active: doctor.is_active ? 'Active' : 'Inactive',
+              total_appointments: 0,
+              pending: 0,
+              confirmed: 0,
+              completed: 0,
+              cancelled: 0
+            });
+          });
+
+          appointments.forEach((appointment) => {
+            const matchedDoctor = doctors.find((doctor) => String(doctor.id) === String(appointment.doctor_id))
+              || doctors.find((doctor) => doctor.full_name === appointment.doctor_name);
+            if (!matchedDoctor) return;
+            const stats = statsByDoctor.get(String(matchedDoctor.id));
+            if (!stats) return;
+
+            stats.total_appointments += 1;
+            if (appointment.status === 'pending') stats.pending += 1;
+            if (appointment.status === 'confirmed') stats.confirmed += 1;
+            if (appointment.status === 'completed') stats.completed += 1;
+            if (appointment.status === 'cancelled') stats.cancelled += 1;
+          });
+
+          const columns = [
+            'Doctor Name',
+            'Specialty',
+            'Branch',
+            'Account Status',
+            'Total Appointments',
+            'Pending',
+            'Confirmed',
+            'Completed',
+            'Cancelled'
+          ];
+          const rows = Array.from(statsByDoctor.values()).map((stats) => [
+            stats.doctor_name,
+            stats.specialty,
+            stats.branch,
+            stats.is_active,
+            String(stats.total_appointments),
+            String(stats.pending),
+            String(stats.confirmed),
+            String(stats.completed),
+            String(stats.cancelled)
+          ]);
+
+          csvContent = convertRowsToCsv(columns, rows);
+          fileName = 'doctor_performance_report.csv';
+        } else if (reportType === 'revenue' || reportType === 'patient-demographics') {
+          const result = await fetchJson(`${API_BASE}/admin/reports.php?type=${encodeURIComponent(reportType)}`);
           if (!result.success || !result.data) {
-            throw new Error(result.message || 'Failed to fetch doctor performance report');
+            throw new Error(result.message || 'Report generation failed');
           }
 
           csvContent = convertRowsToCsv(result.data.columns || [], result.data.rows || []);
-          fileName = result.data.fileName || 'doctor_performance_report.csv';
+          fileName = result.data.fileName || fileName;
         } else {
           const result = await fetchJson(`${API_BASE}/admin/reports.php?type=${encodeURIComponent(reportType)}`);
           if (!result.success || !result.data) {

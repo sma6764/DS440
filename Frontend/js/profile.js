@@ -1,34 +1,62 @@
 // Profile.js - Patient profile page functionality
 
 const API_BASE = window.API_BASE || 'http://localhost/check-me-up/backend/api';
+let currentProfile = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetch(`${API_BASE}/auth/session.php`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include'
-  })
-    .then(response => response.json())
-    .then(sessionData => {
-      if (!sessionData.success) {
-        window.location.href = 'login.html';
-        return;
-      }
+document.addEventListener('DOMContentLoaded', async () => {
+  const sessionData = await verifyActiveSession();
+  if (!sessionData) {
+    return;
+  }
 
-      loadUserProfile();
-      loadAppointments('upcoming');
-      initializeTabSwitching();
-      initializeCancelAppointment();
-      initializeBookAgain();
-      animateSidebar();
-    })
-    .catch(error => {
-      console.error('Session check failed:', error);
-      window.location.href = 'login.html';
-    });
+  const role = sessionData.data && sessionData.data.user_role ? sessionData.data.user_role : null;
+  if (role && role !== 'patient') {
+    if (role === 'doctor') {
+      localStorage.clear();
+      window.location.replace('doctor-dashboard.html');
+      return;
+    }
+    if (role === 'admin') {
+      localStorage.clear();
+      window.location.replace('admin-dashboard.html');
+      return;
+    }
+  }
+
+  loadUserProfile();
+  loadAppointments('upcoming');
+  initializeTabSwitching();
+  initializeCancelAppointment();
+  initializeBookAgain();
+  initializeProfileEditing();
+  animateSidebar();
 });
+
+async function verifyActiveSession() {
+  try {
+    const response = await fetch(`${API_BASE}/auth/session.php`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    const sessionData = await response.json().catch(() => ({ success: false }));
+    if (!sessionData.success) {
+      localStorage.clear();
+      window.location.replace('login.html');
+      return null;
+    }
+
+    return sessionData;
+  } catch (error) {
+    console.error('Session check failed:', error);
+    localStorage.clear();
+    window.location.replace('login.html');
+    return null;
+  }
+}
 
 function loadUserProfile() {
   fetch(`${API_BASE}/patient/profile.php`, {
@@ -45,40 +73,243 @@ function loadUserProfile() {
         return;
       }
 
-      const profile = data.data;
-      const profileName = profile.full_name && profile.full_name.trim() ? profile.full_name : 'Patient';
-
-      const nameElement = document.querySelector('.profile-name');
-      if (nameElement) {
-        nameElement.textContent = profileName;
-      }
-
-      const infoValues = document.querySelectorAll('.profile-info .info-value');
-      if (infoValues.length >= 4) {
-        infoValues[0].textContent = profile.email || 'N/A';
-        infoValues[1].textContent = profile.phone || 'N/A';
-        infoValues[2].textContent = profile.gender || 'N/A';
-        infoValues[3].textContent = profile.date_of_birth || 'N/A';
-      }
-
-      const insuranceBadge = document.querySelector('.insurance-badge');
-      if (insuranceBadge) {
-        insuranceBadge.textContent = profile.insurance_company || 'No Insurance';
-      }
-
-      const infoGridValues = document.querySelectorAll('.info-grid .info-grid-value');
-      if (infoGridValues.length >= 6) {
-        infoGridValues[0].textContent = profileName;
-        infoGridValues[1].textContent = profile.email || 'N/A';
-        infoGridValues[2].textContent = profile.phone || 'N/A';
-        infoGridValues[3].textContent = profile.date_of_birth || 'N/A';
-        infoGridValues[4].textContent = profile.gender || 'N/A';
-        infoGridValues[5].textContent = profile.insurance_company || 'No Insurance';
-      }
+      currentProfile = {
+        ...data.data,
+        full_name: String(data.data.full_name || '').trim(),
+        phone: String(data.data.phone || '').trim(),
+        date_of_birth: String(data.data.date_of_birth || '').trim(),
+        gender: String(data.data.gender || '').trim(),
+        insurance_company: String(data.data.insurance_company || '').trim()
+      };
+      renderProfile(currentProfile);
     })
     .catch(error => {
       console.error('Error fetching profile:', error);
     });
+}
+
+function renderProfile(profile) {
+  const profileName = profile.full_name || 'Patient';
+  const formattedDob = formatDateForDisplay(profile.date_of_birth);
+
+  const profileNameElement = document.getElementById('profileName');
+  if (profileNameElement) {
+    profileNameElement.textContent = profileName;
+  }
+
+  const avatarElement = document.getElementById('profileAvatar');
+  if (avatarElement) {
+    avatarElement.textContent = getInitials(profileName);
+  }
+
+  setTextById('sidebarEmail', profile.email || 'N/A');
+  setTextById('sidebarPhone', profile.phone || 'N/A');
+  setTextById('sidebarGender', profile.gender || 'N/A');
+  setTextById('sidebarDob', formattedDob);
+  setTextById('sidebarInsurance', profile.insurance_company || 'No Insurance');
+
+  setTextById('roFullName', profileName);
+  setTextById('roEmail', profile.email || 'N/A');
+  setTextById('roPhone', profile.phone || 'N/A');
+  setTextById('roDob', formattedDob);
+  setTextById('roGender', profile.gender || 'N/A');
+  setTextById('roInsurance', profile.insurance_company || 'No Insurance');
+}
+
+function setTextById(id, value) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = value;
+  }
+}
+
+function formatDateForDisplay(dateValue) {
+  if (!dateValue) {
+    return 'N/A';
+  }
+
+  const dateObj = new Date(`${dateValue}T00:00:00`);
+  if (Number.isNaN(dateObj.getTime())) {
+    return dateValue;
+  }
+
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
+function getInitials(fullName) {
+  const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return 'PA';
+  }
+  return parts.slice(0, 2).map(part => part[0].toUpperCase()).join('');
+}
+
+function initializeProfileEditing() {
+  const editButton = document.getElementById('editProfileBtn');
+  const cancelButton = document.getElementById('cancelEditProfile');
+  const editForm = document.getElementById('profileEditForm');
+  const readView = document.getElementById('profileReadOnlyView');
+
+  if (!editButton || !cancelButton || !editForm || !readView) {
+    return;
+  }
+
+  const phoneInput = document.getElementById('editPhone');
+  if (phoneInput && phoneInput.dataset.phoneSanitized !== '1') {
+    phoneInput.dataset.phoneSanitized = '1';
+    phoneInput.addEventListener('input', () => {
+      const sanitizedValue = String(phoneInput.value || '').replace(/[^0-9+\s\-()+]/g, '');
+      if (sanitizedValue !== phoneInput.value) {
+        phoneInput.value = sanitizedValue;
+      }
+    });
+  }
+
+  editButton.addEventListener('click', () => {
+    if (!currentProfile) {
+      return;
+    }
+    clearProfileMessage();
+    fillEditForm(currentProfile);
+    readView.style.display = 'none';
+    editForm.style.display = 'block';
+    editButton.style.display = 'none';
+  });
+
+  cancelButton.addEventListener('click', () => {
+    clearProfileMessage();
+    editForm.reset();
+    editForm.style.display = 'none';
+    readView.style.display = 'grid';
+    editButton.style.display = 'inline-flex';
+  });
+
+  editForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearProfileMessage();
+
+    const payload = {
+      full_name: String(document.getElementById('editFullName')?.value || '').trim(),
+      phone: String(document.getElementById('editPhone')?.value || '').trim(),
+      date_of_birth: String(document.getElementById('editDob')?.value || '').trim(),
+      gender: String(document.getElementById('editGender')?.value || '').trim(),
+      insurance_company: String(document.getElementById('editInsurance')?.value || '').trim()
+    };
+
+    if (!payload.full_name || !payload.phone || !payload.date_of_birth || !payload.gender || !payload.insurance_company) {
+      showProfileMessage('Please fill in all fields.', 'error');
+      return;
+    }
+
+    if (!/^[0-9+\s\-()+]{7,20}$/.test(payload.phone)) {
+      showProfileMessage('Phone number contains invalid characters.', 'error');
+      return;
+    }
+
+    const submitButton = editForm.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : '';
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Saving...';
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/patient/update-profile.php`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json().catch(() => ({ success: false, message: 'Unexpected server response' }));
+      if (!response.ok || !result.success) {
+        showProfileMessage(result.message || 'Failed to update profile.', 'error');
+        return;
+      }
+
+      currentProfile = {
+        ...currentProfile,
+        ...payload
+      };
+
+      renderProfile(currentProfile);
+      updateLocalUserName(payload.full_name);
+      showProfileMessage('Profile updated successfully', 'success');
+
+      editForm.style.display = 'none';
+      readView.style.display = 'grid';
+      editButton.style.display = 'inline-flex';
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      showProfileMessage('Could not connect to server. Please try again.', 'error');
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+}
+
+function fillEditForm(profile) {
+  const setValue = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.value = value || '';
+    }
+  };
+
+  setValue('editFullName', profile.full_name);
+  setValue('editPhone', profile.phone);
+  setValue('editDob', profile.date_of_birth);
+  setValue('editGender', profile.gender);
+  setValue('editInsurance', profile.insurance_company);
+}
+
+function showProfileMessage(message, type) {
+  const messageElement = document.getElementById('profileUpdateMessage');
+  if (!messageElement) {
+    return;
+  }
+  messageElement.className = `profile-update-message ${type}`;
+  messageElement.textContent = message;
+}
+
+function clearProfileMessage() {
+  const messageElement = document.getElementById('profileUpdateMessage');
+  if (!messageElement) {
+    return;
+  }
+  messageElement.className = 'profile-update-message';
+  messageElement.textContent = '';
+}
+
+function updateLocalUserName(fullName) {
+  let existingUser = {};
+  try {
+    existingUser = JSON.parse(localStorage.getItem('checkmeup_user') || '{}');
+  } catch {
+    existingUser = {};
+  }
+
+  const updatedUser = {
+    ...existingUser,
+    name: fullName,
+    user_name: fullName
+  };
+  localStorage.setItem('checkmeup_user', JSON.stringify(updatedUser));
+
+  const greeting = document.querySelector('.navbar .nav-links span');
+  if (greeting && greeting.textContent.trim().startsWith('Hi,')) {
+    const firstName = fullName.split(' ')[0];
+    greeting.textContent = `Hi, ${firstName}`;
+  }
 }
 
 function loadAppointments(type) {
@@ -123,14 +354,31 @@ function loadAppointments(type) {
         const row = document.createElement('tr');
 
         if (type === 'upcoming') {
+          const normalizedStatus = String(appointment.status || 'pending').toLowerCase();
+          const canCancel = normalizedStatus === 'pending' || normalizedStatus === 'confirmed';
+          const statusClass = normalizedStatus === 'confirmed'
+            ? 'status-confirmed'
+            : normalizedStatus === 'cancelled'
+              ? 'status-cancelled'
+              : normalizedStatus === 'completed'
+                ? 'status-completed'
+                : 'status-pending';
+          const statusTitle = normalizedStatus === 'confirmed'
+            ? 'Your appointment is confirmed'
+            : normalizedStatus === 'pending'
+              ? 'Waiting for doctor confirmation'
+              : normalizedStatus === 'cancelled'
+                ? 'This appointment was cancelled'
+                : 'This appointment is completed';
+
           row.innerHTML = `
             <td>${appointment.doctor_name || 'N/A'}</td>
             <td>${appointment.specialty || 'N/A'}</td>
             <td>${appointment.branch || 'N/A'}</td>
             <td>${appointment.date || 'N/A'}</td>
             <td>${appointment.time || 'N/A'}</td>
-            <td><span class="status-badge status-confirmed">${appointment.status || 'pending'}</span></td>
-            <td><button class="btn-cancel" data-id="${appointment.id}">Cancel</button></td>
+            <td><span class="status-badge ${statusClass}" title="${statusTitle}">${capitalizeStatus(normalizedStatus)}</span></td>
+            <td>${canCancel ? `<button class="btn-cancel" data-id="${appointment.id}">Cancel</button>` : ''}</td>
           `;
         } else {
           row.innerHTML = `
@@ -160,6 +408,14 @@ function loadAppointments(type) {
       console.error('Error fetching appointments:', error);
       tableBody.innerHTML = `<tr><td colspan="${emptyCols}" style="text-align: center; padding: 2rem; color: #EF4444;">Could not load data. Please try again.</td></tr>`;
     });
+}
+
+function capitalizeStatus(status) {
+  const value = String(status || '').trim();
+  if (!value) {
+    return 'Pending';
+  }
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function initializeTabSwitching() {
@@ -292,7 +548,7 @@ function initializeBookAgain() {
       return;
     }
 
-    window.location.href = 'booking.html';
+    window.location.replace('booking.html');
   });
 }
 

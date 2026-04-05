@@ -129,7 +129,7 @@ body {
 
 .nav-item.active {
   background: var(--color-primary-gradient);
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: 600;
 }
 
@@ -158,7 +158,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
 }
@@ -179,7 +179,7 @@ body {
 .online-indicator {
   width: 10px;
   height: 10px;
-  background: #4ade80;
+  background: var(--color-success);
   border-radius: 50%;
   margin: 8px auto;
 }
@@ -254,8 +254,8 @@ body {
   position: absolute;
   top: -6px;
   right: -6px;
-  background: #ef4444;
-  color: white;
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -274,7 +274,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: 700;
   font-size: 14px;
 }
@@ -517,7 +517,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: 600;
   font-size: 12px;
   flex-shrink: 0;
@@ -548,28 +548,28 @@ body {
 }
 
 .badge-confirmed {
-  background: rgba(74, 222, 128, 0.1);
-  color: #22c55e;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .badge-pending {
-  background: rgba(250, 204, 21, 0.1);
-  color: #eab308;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .badge-completed {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .badge-cancelled {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .btn-small {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
@@ -669,7 +669,7 @@ body {
 
 .calendar-day.today {
   background: var(--color-primary-gradient);
-  color: white;
+  color: var(--color-text-inverse);
   border-color: var(--color-primary);
   font-weight: 600;
 }
@@ -683,15 +683,15 @@ body {
 }
 
 .day-indicator.confirmed {
-  background: #22c55e;
+  background: var(--color-success);
 }
 
 .day-indicator.pending {
-  background: #eab308;
+  background: var(--color-warning);
 }
 
 .day-indicator.cancelled {
-  background: #ef4444;
+  background: var(--color-danger);
 }
 
 .calendar-legend {
@@ -717,15 +717,15 @@ body {
 }
 
 .legend-dot.confirmed {
-  background: #22c55e;
+  background: var(--color-success);
 }
 
 .legend-dot.pending {
-  background: #eab308;
+  background: var(--color-warning);
 }
 
 .legend-dot.cancelled {
-  background: #ef4444;
+  background: var(--color-danger);
 }
 
 /* Schedule Timeline */
@@ -776,7 +776,7 @@ body {
   border-radius: 6px;
   padding: 8px;
   margin-bottom: 8px;
-  color: white;
+  color: var(--color-text-inverse);
   font-size: 11px;
   cursor: pointer;
   transition: transform 0.2s;
@@ -823,7 +823,7 @@ body {
 .doctor-skeleton {
   position: relative;
   overflow: hidden;
-  background: rgba(148, 163, 184, 0.12);
+  background: var(--color-muted-surface);
 }
 
 .doctor-skeleton::after {
@@ -833,7 +833,7 @@ body {
   left: -150%;
   width: 120%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-shimmer-line), transparent);
   animation: doctorShimmer 1.2s ease-in-out infinite;
 }
 
@@ -843,7 +843,7 @@ body {
   padding: 8px;
   color: var(--text-muted);
   font-size: 11px;
-  background: rgba(148, 163, 184, 0.06);
+  background: var(--color-muted-surface-soft);
   margin-bottom: 8px;
 }
 

@@ -93,14 +93,14 @@
 .progress-step.active .step-number {
   background: var(--color-primary-gradient);
   border-color: var(--color-primary);
-  color: white;
-  box-shadow: 0 0 20px rgba(79, 142, 247, 0.4);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-glow);
 }
 
 .progress-step.completed .step-number {
-  background: #10B981;
-  border-color: #10B981;
-  color: white;
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-text-inverse);
   font-size: 1.3rem;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .specialist-card {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 2rem 1.5rem;
@@ -188,15 +188,15 @@
 
 .specialist-card:hover {
   border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-muted);
   transform: translateY(-6px);
-  box-shadow: 0 8px 32px rgba(79, 142, 247, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .specialist-card.selected {
   border-color: var(--color-primary);
   background: var(--color-primary-glow);
-  box-shadow: 0 0 24px rgba(79, 142, 247, 0.4);
+  box-shadow: var(--color-primary-shadow-medium);
 }
 
 .specialist-icon {
@@ -244,7 +244,7 @@
 .branch-dropdown:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 12px rgba(79, 142, 247, 0.2);
+  box-shadow: var(--color-primary-shadow-small);
 }
 
 .doctors-section h3 {
@@ -263,7 +263,7 @@
 }
 
 .doctor-card {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 1.5rem;
@@ -283,15 +283,15 @@
 
 .doctor-card:hover {
   border-color: var(--color-primary);
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--color-surface-strong);
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(79, 142, 247, 0.15);
+  box-shadow: var(--color-primary-shadow-soft);
 }
 
 .doctor-card.selected {
   border-color: var(--color-primary);
   background: var(--color-primary-glow);
-  box-shadow: 0 0 24px rgba(79, 142, 247, 0.4);
+  box-shadow: var(--color-primary-shadow-medium);
 }
 
 .doctor-photo {
@@ -301,7 +301,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(79, 142, 247, 0.2), rgba(92, 194, 255, 0.2));
+  background: linear-gradient(135deg, var(--color-primary-glow), var(--color-primary-soft-glow));
   border: 2px solid var(--color-primary);
   border-radius: 50%;
   flex-shrink: 0;
@@ -332,12 +332,6 @@
   justify-content: center;
   gap: 0.3rem;
   margin-bottom: 0.5rem;
-}
-
-.doctor-rating {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
 }
 
 /* Step 3: Date & Time Selection */
@@ -376,7 +370,7 @@
 .date-picker:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 12px rgba(79, 142, 247, 0.2);
+  box-shadow: var(--color-primary-shadow-small);
 }
 
 .time-slots {
@@ -400,22 +394,22 @@
 
 .time-slot:hover {
   border-color: var(--color-primary);
-  background: rgba(79, 142, 247, 0.1);
+  background: var(--status-info-bg);
   transform: translateY(-2px);
 }
 
 .time-slot.selected {
   background: var(--color-primary-gradient);
   border-color: var(--color-primary);
-  color: white;
-  box-shadow: 0 0 16px rgba(79, 142, 247, 0.4);
+  color: var(--color-text-inverse);
+  box-shadow: var(--color-primary-shadow-large);
 }
 
 /* Step 4: Confirmation */
 .confirmation-card {
   max-width: 700px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 2.5rem;
@@ -495,19 +489,19 @@
 }
 
 .insurance-covered {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
-  border-left-color: #10B981;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border-left-color: var(--status-success-text);
 }
 
 .insurance-not-covered {
-  background: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
-  border-left-color: #F59E0B;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+  border-left-color: var(--status-warning-text);
 }
 
 .insurance-no-coverage {
-  background: rgba(107, 114, 128, 0.1);
+  background: var(--status-warning-bg);
   color: var(--color-text-secondary);
   border-left-color: var(--color-border);
 }
@@ -518,7 +512,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   background: var(--color-primary-gradient);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -531,7 +525,7 @@
 }
 
 .confirm-button:hover {
-  box-shadow: 0 0 28px rgba(79, 142, 247, 0.5);
+  box-shadow: var(--color-primary-shadow-large);
   transform: translateY(-2px);
 }
 
@@ -542,10 +536,10 @@
 
 /* Success & Error Messages */
 .success-message {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid #10B981;
-  border-left: 4px solid #10B981;
-  color: #10B981;
+  background: var(--status-success-bg);
+  border: 1px solid var(--status-success-border);
+  border-left: 4px solid var(--status-success-text);
+  color: var(--status-success-text);
   padding: 1.5rem;
   border-radius: var(--radius-md);
   margin-top: 2rem;
@@ -555,10 +549,10 @@
 }
 
 .error-message {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid #EF4444;
-  border-left: 4px solid #EF4444;
-  color: #EF4444;
+  background: var(--status-danger-bg);
+  border: 1px solid var(--status-danger-border);
+  border-left: 4px solid var(--status-danger-text);
+  color: var(--status-danger-text);
   padding: 1rem 1.25rem;
   border-radius: var(--radius-sm);
   margin-top: 1.5rem;
@@ -629,7 +623,7 @@
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-muted);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }

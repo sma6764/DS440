@@ -74,7 +74,7 @@
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-text-inverse);
   background: var(--color-primary-gradient);
 }
 
@@ -150,6 +150,28 @@
   margin-bottom: 0.2rem;
 }
 
+.my-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-update-message {
+  min-height: 1.2rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+.profile-update-message.success {
+  color: var(--color-success);
+}
+
+.profile-update-message.error {
+  color: var(--color-error);
+}
+
 .appointments-count {
   color: var(--color-text-muted);
 }
@@ -186,15 +208,15 @@
 }
 
 .btn-cancel {
-  background: rgba(239,68,68,0.15);
-  color: #EF4444;
-  border-color: rgba(239,68,68,0.3);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border-color: var(--status-danger-border);
 }
 
 .btn-book-again {
-  background: rgba(79,142,247,0.15);
-  color: #4F8EF7;
-  border-color: rgba(79,142,247,0.3);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+  border-color: var(--status-info-border);
 }
 
 #upcomingAppointments td[colspan],
@@ -232,7 +254,7 @@
   padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-surface-stripe);
   display: grid;
   gap: 0.25rem;
 }
@@ -248,6 +270,49 @@
   color: var(--color-text-secondary);
 }
 
+.profile-edit-form {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  background: var(--color-surface-stripe);
+}
+
+.profile-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.profile-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.profile-field-full {
+  grid-column: 1 / -1;
+}
+
+.profile-field label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.profile-field input,
+.profile-field select {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.62rem 0.75rem;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
 @media (max-width: 68rem) {
   .profile-layout {
     grid-template-columns: 1fr;
@@ -259,6 +324,19 @@
 }
 
 @media (max-width: 40rem) {
+  .my-info-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-edit-actions {
+    flex-direction: column;
+  }
+
   .info-grid {
     grid-template-columns: 1fr;
   }

@@ -1,6 +1,9 @@
-// Navbar.js - Dynamic navbar authentication state
+// Navbar.js - Dynamic navbar authentication state and theme toggle
+
+const THEME_STORAGE_KEY = 'theme';
 
 document.addEventListener('DOMContentLoaded', () => {
+  initializeThemeToggleState();
   updateNavbarAuthState();
   initializeNavbarMenu();
   initializeFooterContactInfo();
@@ -14,6 +17,76 @@ function clearAuthLocalStorage() {
   localStorage.removeItem('checkmeup_user');
   localStorage.removeItem('checkmeup_role');
   localStorage.removeItem('user_role');
+}
+
+function getStoredTheme() {
+  return localStorage.getItem(THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  const resolvedTheme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = resolvedTheme;
+  document.documentElement.style.colorScheme = resolvedTheme;
+  return resolvedTheme;
+}
+
+function updateThemeToggleButton(button, theme) {
+  if (!button) return;
+
+  const icon = button.querySelector('.theme-toggle-icon');
+  if (icon) {
+    icon.textContent = theme === 'light' ? '☀️' : '🌙';
+  }
+
+  button.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+  button.setAttribute('title', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+}
+
+function initializeThemeToggleState() {
+  const theme = applyTheme(getStoredTheme());
+  const toggleButton = document.querySelector('.theme-toggle');
+  updateThemeToggleButton(toggleButton, theme);
+}
+
+function bindThemeToggleButton(toggleButton) {
+  if (!toggleButton || toggleButton.dataset.bound === 'true') return;
+
+  toggleButton.dataset.bound = 'true';
+  toggleButton.addEventListener('click', () => {
+    const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    applyTheme(nextTheme);
+    updateThemeToggleButton(toggleButton, nextTheme);
+  });
+}
+
+function ensureThemeToggle(navLinks) {
+  let toggleButton = navLinks.querySelector('.theme-toggle');
+
+  if (!toggleButton) {
+    toggleButton = document.createElement('button');
+    toggleButton.type = 'button';
+    toggleButton.className = 'theme-toggle nav-cta nav-theme-toggle';
+
+    const icon = document.createElement('span');
+    icon.className = 'theme-toggle-icon';
+    toggleButton.appendChild(icon);
+
+    const insertionTarget =
+      navLinks.querySelector('a.nav-cta-book') ||
+      navLinks.querySelector('a.nav-cta-check') ||
+      navLinks.querySelector('a[href="login.html"]') ||
+      navLinks.querySelector('a[href="profile.html"], a[href="doctor-dashboard.html"], a[href="admin-dashboard.html"], a[href="logout.html"]');
+
+    if (insertionTarget) {
+      navLinks.insertBefore(toggleButton, insertionTarget);
+    } else {
+      navLinks.appendChild(toggleButton);
+    }
+  }
+
+  updateThemeToggleButton(toggleButton, getStoredTheme());
+  bindThemeToggleButton(toggleButton);
 }
 
 function renderLoggedOutNavbarState(navbar, navLinks) {
@@ -56,6 +129,7 @@ async function updateNavbarAuthState() {
   const navLinks = navbar.querySelector('.nav-links');
   if (!navLinks) return;
 
+  ensureThemeToggle(navLinks);
   ensureNavbarCtas(navLinks);
 
   let sessionActive = false;
@@ -99,7 +173,7 @@ async function updateNavbarAuthState() {
       
       // Create greeting text
       const greeting = document.createElement('span');
-      greeting.style.color = 'var(--color-text-muted, #6B7280)';
+      greeting.style.color = 'var(--color-text-muted)';
       greeting.style.marginRight = '1.5rem';
       greeting.style.fontSize = '0.95rem';
       greeting.textContent = `Hi, ${firstName}`;
@@ -123,7 +197,7 @@ async function updateNavbarAuthState() {
       const logoutLink = document.createElement('a');
       logoutLink.href = 'logout.html';
       logoutLink.textContent = 'Logout';
-      logoutLink.style.color = 'var(--color-error, #ef4444)';
+      logoutLink.style.color = 'var(--color-error)';
       
       // Append new elements to navbar
       navLinks.appendChild(greeting);
@@ -146,6 +220,7 @@ function initializeNavbarMenu() {
   const navLinks = navbar.querySelector('.nav-links');
   if (!navbarContent || !navLinks) return;
 
+  ensureThemeToggle(navLinks);
   ensureNavbarCtas(navLinks);
 
   let toggleButton = navbar.querySelector('.nav-toggle');

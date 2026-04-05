@@ -29,12 +29,46 @@ const progressSteps = document.querySelectorAll('.progress-step');
 const formSteps = document.querySelectorAll('.form-step');
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const access = await checkBookingAccess();
+  if (!access) {
+    return;
+  }
+
   loadSpecialists();
   initializeEventListeners();
   updateStepDisplay();
   addCardAnimationClasses();
 });
+
+async function checkBookingAccess() {
+  try {
+    const response = await fetch(`${API_BASE}/auth/session.php`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    const sessionResult = await response.json().catch(() => ({ success: false }));
+
+    if (sessionResult.success && sessionResult.data) {
+      const role = sessionResult.data.user_role;
+      if (role === 'doctor') {
+        alert('Doctors cannot book appointments. Redirecting to your dashboard.');
+        window.location.replace('doctor-dashboard.html');
+        return false;
+      }
+      if (role === 'admin') {
+        alert('Admins cannot book appointments. Redirecting to your dashboard.');
+        window.location.replace('admin-dashboard.html');
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Session check failed, allowing booking page:', error);
+    return true;
+  }
+}
 
 // Add animation classes to cards
 function addCardAnimationClasses() {
@@ -81,7 +115,7 @@ function initializeEventListeners() {
   // Step 3: Date selection
   const dateInput = document.getElementById('appointment-date');
   dateInput.addEventListener('change', (e) => {
-    bookingData.date = e.target.value;
+    const selectedDate = e.target.value;
     bookingData.time = null;
 
     const timeSlotsContainer = document.querySelector('.time-slots');
@@ -89,6 +123,21 @@ function initializeEventListeners() {
       // Always clear old slots when the date changes to prevent stacking.
       timeSlotsContainer.innerHTML = '';
     }
+
+    if (selectedDate) {
+      const pickedDay = new Date(`${selectedDate}T00:00:00`).getDay(); // 0=Sun ... 6=Sat
+      const isBlockedDay = pickedDay === 0 || pickedDay === 5 || pickedDay === 6;
+
+      if (isBlockedDay) {
+        bookingData.date = null;
+        if (timeSlotsContainer) {
+          timeSlotsContainer.innerHTML = '<div style="text-align: center; padding: 1rem; color: #EF4444; grid-column: 1 / -1;">Appointments are not available on weekends. Please select a weekday.</div>';
+        }
+        return;
+      }
+    }
+
+    bookingData.date = selectedDate;
     
     // Fetch available slots when date changes
     if (bookingData.doctor && bookingData.date) {
@@ -366,7 +415,6 @@ function loadDoctors(specialist, branchId) {
               <h4 class="doctor-name">${doctor.full_name}</h4>
               <p class="doctor-specialty">${doctor.specialty}</p>
               <p class="doctor-branch" style="font-size: 0.875rem; color: #6B7280;">${doctor.branch}</p>
-              <div class="doctor-rating">⭐ ${doctor.rating} rating</div>
             </div>
           `;
           
@@ -643,7 +691,7 @@ function displayInsuranceCoverage() {
 }
 
 // Handle confirm booking with API call
-function handleConfirmBooking() {
+async function handleConfirmBooking() {
   const confirmBtn = document.querySelector('.confirm-button');
   const confirmationCard = document.querySelector('.confirmation-card');
 
@@ -654,6 +702,24 @@ function handleConfirmBooking() {
 
   if (!doctorId || !appointmentDate || !appointmentTime) {
     showErrorMessage(4, 'Please complete doctor, date, and time selection before confirming.');
+    return;
+  }
+
+  try {
+    const sessionResponse = await fetch(`${API_BASE}/auth/session.php`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    const sessionResult = await sessionResponse.json().catch(() => ({ success: false }));
+
+    if (!sessionResult.success || !sessionResult.data || sessionResult.data.user_role !== 'patient') {
+      const loginMessage = 'Please log in to confirm your booking';
+      window.location.href = `login.html?message=${encodeURIComponent(loginMessage)}`;
+      return;
+    }
+  } catch (error) {
+    const loginMessage = 'Please log in to confirm your booking';
+    window.location.href = `login.html?message=${encodeURIComponent(loginMessage)}`;
     return;
   }
 

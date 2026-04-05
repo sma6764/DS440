@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="../js/theme-bootstrap.js"></script>
   <title>My Profile - Check-me-up</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/profile.css">
@@ -14,7 +18,6 @@
       <div class="logo">Check-me-up</div>
       <div class="nav-links">
         <a href="index.html">Home</a>
-        <a href="index.html#how-it-works">How it Works</a>
         <a href="insurance.html">Insurance</a>
         <a href="contact.html">Contact Us</a>
         <a href="symptom-checker.html" class="btn-secondary nav-cta nav-cta-check">🩺 Check Symptoms</a>
@@ -31,33 +34,33 @@
         
         <!-- Left Sidebar -->
         <aside class="profile-sidebar">
-          <div class="profile-avatar">PA</div>
-          <h2 class="profile-name">Sarah Thompson</h2>
+          <div class="profile-avatar" id="profileAvatar">PA</div>
+          <h2 class="profile-name" id="profileName">Sarah Thompson</h2>
           
           <div class="profile-info">
             <div class="info-item">
               <span class="info-label">Email</span>
-              <span class="info-value">sara.almansoori@email.com</span>
+              <span class="info-value" id="sidebarEmail">sara.almansoori@email.com</span>
             </div>
             
             <div class="info-item">
               <span class="info-label">Phone</span>
-              <span class="info-value">+1 (215) 555-0199</span>
+              <span class="info-value" id="sidebarPhone">+1 (215) 555-0199</span>
             </div>
             
             <div class="info-item">
               <span class="info-label">Gender</span>
-              <span class="info-value">Female</span>
+              <span class="info-value" id="sidebarGender">Female</span>
             </div>
             
             <div class="info-item">
               <span class="info-label">Date of Birth</span>
-              <span class="info-value">March 15, 1995</span>
+              <span class="info-value" id="sidebarDob">March 15, 1995</span>
             </div>
             
             <div class="info-item">
               <span class="info-label">Insurance</span>
-              <span class="insurance-badge">Blue Cross Blue Shield</span>
+              <span class="insurance-badge" id="sidebarInsurance">Blue Cross Blue Shield</span>
             </div>
           </div>
           
@@ -176,42 +179,98 @@
 
           <!-- Tab Content 3: My Information -->
           <div class="tab-content" id="info">
-            <div class="appointments-header">
-              <h2>My Information</h2>
-              <p class="appointments-count">Your personal details</p>
+            <div class="my-info-header">
+              <div class="appointments-header">
+                <h2>My Information</h2>
+                <p class="appointments-count">Your personal details</p>
+              </div>
+              <button type="button" id="editProfileBtn" class="btn-secondary">Edit Profile</button>
             </div>
+
+            <p id="profileUpdateMessage" class="profile-update-message" aria-live="polite"></p>
             
-            <div class="info-grid">
+            <div class="info-grid" id="profileReadOnlyView">
               <div class="info-grid-item">
                 <span class="info-grid-label">Full Name</span>
-                <span class="info-grid-value">Sarah Thompson</span>
+                <span class="info-grid-value" id="roFullName">Sarah Thompson</span>
               </div>
               
               <div class="info-grid-item">
                 <span class="info-grid-label">Email Address</span>
-                <span class="info-grid-value">sara.almansoori@email.com</span>
+                <span class="info-grid-value" id="roEmail">sara.almansoori@email.com</span>
               </div>
               
               <div class="info-grid-item">
                 <span class="info-grid-label">Phone Number</span>
-                <span class="info-grid-value">+1 (215) 555-0199</span>
+                <span class="info-grid-value" id="roPhone">+1 (215) 555-0199</span>
               </div>
               
               <div class="info-grid-item">
                 <span class="info-grid-label">Date of Birth</span>
-                <span class="info-grid-value">March 15, 1995</span>
+                <span class="info-grid-value" id="roDob">March 15, 1995</span>
               </div>
               
               <div class="info-grid-item">
                 <span class="info-grid-label">Gender</span>
-                <span class="info-grid-value">Female</span>
+                <span class="info-grid-value" id="roGender">Female</span>
               </div>
               
               <div class="info-grid-item">
                 <span class="info-grid-label">Insurance Company</span>
-                <span class="info-grid-value">Blue Cross Blue Shield</span>
+                <span class="info-grid-value" id="roInsurance">Blue Cross Blue Shield</span>
               </div>
             </div>
+
+            <form id="profileEditForm" class="profile-edit-form" style="display: none;" novalidate>
+              <div class="profile-edit-grid">
+                <div class="profile-field">
+                  <label for="editFullName">Full Name</label>
+                  <input type="text" id="editFullName" name="full_name" required>
+                </div>
+
+                <div class="profile-field">
+                  <label for="editPhone">Phone</label>
+                  <input type="tel" id="editPhone" name="phone" required>
+                </div>
+
+                <div class="profile-field">
+                  <label for="editDob">Date of Birth</label>
+                  <input type="date" id="editDob" name="date_of_birth" required>
+                </div>
+
+                <div class="profile-field">
+                  <label for="editGender">Gender</label>
+                  <select id="editGender" name="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+
+                <div class="profile-field profile-field-full">
+                  <label for="editInsurance">Insurance Company</label>
+                  <select id="editInsurance" name="insurance_company" required>
+                    <option value="">Select insurance</option>
+                    <option value="Blue Cross Blue Shield">Blue Cross Blue Shield</option>
+                    <option value="Aetna">Aetna</option>
+                    <option value="UnitedHealthcare">UnitedHealthcare</option>
+                    <option value="Cigna">Cigna</option>
+                    <option value="Humana">Humana</option>
+                    <option value="Medicare">Medicare</option>
+                    <option value="Medicaid">Medicaid</option>
+                    <option value="Kaiser Permanente">Kaiser Permanente</option>
+                    <option value="Anthem">Anthem</option>
+                    <option value="Oscar Health">Oscar Health</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="profile-edit-actions">
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <button type="button" id="cancelEditProfile" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
           </div>
 
         </main>

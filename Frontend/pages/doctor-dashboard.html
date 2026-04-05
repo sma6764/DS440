@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="../js/theme-bootstrap.js"></script>
   <title>Doctor Dashboard - Check-me-up</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/doctor-dashboard.css">
@@ -299,6 +303,7 @@
               <div class="table-header-section" style="gap: 0.75rem; flex-wrap: wrap;">
                 <h3>Filters</h3>
                 <div class="table-controls" style="margin-left: auto; flex-wrap: wrap;">
+                  <button id="doctor-pending-shortcut" class="btn-small" type="button">Pending Only</button>
                   <select id="doctor-status-filter" class="sort-dropdown">
                     <option value="all">All Statuses</option>
                     <option value="pending">Pending</option>
@@ -408,7 +413,6 @@
           <h4 class="footer-heading">Quick Links</h4>
           <ul class="footer-links">
             <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#how-it-works">How it Works</a></li>
             <li><a href="insurance.html">Insurance</a></li>
             <li><a href="booking.html">Book Now</a></li>
             <li><a href="symptom-checker.html">Check My Symptoms</a></li>

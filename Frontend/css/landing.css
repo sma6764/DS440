@@ -30,7 +30,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 60% 40% at 50% 40%, rgba(79,142,247,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 40% at 50% 40%, var(--color-primary-glow) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -45,7 +45,7 @@
   font-size: clamp(2.8rem, 6vw, 64px);
   line-height: 1.1;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--color-text);
   letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
 }
@@ -166,7 +166,7 @@
 }
 
 .feature-cards .card:hover {
-  box-shadow: 0 0 38px rgba(79, 142, 247, 0.2);
+  box-shadow: var(--color-primary-shadow-hover);
 }
 
 .testimonials-grid {
@@ -187,7 +187,7 @@
 
 .testimonial-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 36px rgba(79, 142, 247, 0.2);
+  box-shadow: var(--color-primary-shadow-hover);
 }
 
 .quote-mark {
@@ -243,7 +243,7 @@
 }
 
 .stars {
-  color: #f6c453;
+  color: var(--color-warning);
   letter-spacing: 0.06em;
 }
 
