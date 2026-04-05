@@ -11,18 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Read incoming JSON body
 $data = json_decode(file_get_contents("php://input"), true);
 
-// Validate all required fields are present and not empty
-$requiredFields = ['full_name', 'email', 'subject', 'message'];
-foreach ($requiredFields as $field) {
-  if (!isset($data[$field]) || trim($data[$field]) === '') {
-    sendResponse(false, "All fields are required");
-  }
-}
+$fullName = validateInput($data['full_name'] ?? '');
+$email = validateInput($data['email'] ?? '');
+$subject = validateInput($data['subject'] ?? '');
+$message = validateInput($data['message'] ?? '');
 
-$fullName = trim($data['full_name']);
-$email = trim($data['email']);
-$subject = trim($data['subject']);
-$message = trim($data['message']);
+// Validate all required fields are present and not empty
+if ($fullName === '' || $email === '' || $subject === '' || $message === '') {
+  sendResponse(false, "All fields are required");
+}
 
 // Validate email format
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -33,12 +30,6 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 if (strlen($message) < 10) {
   sendResponse(false, "Message must be at least 10 characters");
 }
-
-// Sanitize all inputs
-$fullName = htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8');
-$email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
-$subject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
-$message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
 // Insert into contact_messages table
 $sql = "INSERT INTO contact_messages (full_name, email, subject, message, submitted_at) 

@@ -31,6 +31,19 @@ function sendResponse($success, $message, $data = null, $code = null) {
 }
 
 /**
+ * Validate and normalize raw user input.
+ *
+ * @param mixed $data - Input to validate
+ * @return string - Normalized input
+ */
+function validateInput($data) {
+    $data = trim((string)$data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    return $data;
+}
+
+/**
  * Sanitize user input
  * 
  * @param mysqli $conn - Database connection
@@ -38,7 +51,9 @@ function sendResponse($success, $message, $data = null, $code = null) {
  * @return string - Sanitized input
  */
 function sanitize($conn, $input) {
-    return mysqli_real_escape_string($conn, trim($input));
+    $input = validateInput($input);
+    $input = preg_replace('/\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE|REPLACE|EXEC|MERGE|SLEEP|BENCHMARK|FROM|WHERE|JOIN|TABLE|DATABASE)\b/i', '', $input);
+    return mysqli_real_escape_string($conn, $input);
 }
 
 /**
@@ -56,7 +71,11 @@ function isLoggedIn() {
  * @return void
  */
 function requireLogin() {
-    if (!isLoggedIn()) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
         sendResponse(false, "Unauthorized. Please log in.");
         exit();
     }

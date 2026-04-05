@@ -9,7 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-requireRole('doctor');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    sendResponse(false, "Forbidden. Doctor access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $userId = (int)$_SESSION['user_id'];
 
@@ -35,13 +39,13 @@ $doctorStmt->close();
 // Optional query params: start (preferred) or week_start (legacy), format YYYY-MM-DD.
 $weekStartParam = '';
 if (isset($_GET['start'])) {
-    $weekStartParam = trim((string)$_GET['start']);
+    $weekStartParam = validateInput($_GET['start']);
 } elseif (isset($_GET['week_start'])) {
-    $weekStartParam = trim((string)$_GET['week_start']);
+    $weekStartParam = validateInput($_GET['week_start']);
 }
 $today = new DateTime('today');
 if ($weekStartParam !== '') {
-    $parsed = DateTime::createFromFormat('Y-m-d', $weekStartParam);
+    $parsed = DateTime::createFromFormat('Y-m-d', validateInput($weekStartParam));
     if ($parsed instanceof DateTime) {
         $target = new DateTime($parsed->format('Y-m-d'));
         $dayOfWeek = (int)$target->format('N');

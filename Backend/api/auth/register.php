@@ -14,14 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data = json_decode(file_get_contents("php://input"), true);
 
 // Extract fields from request
-$full_name = isset($data['full_name']) ? trim($data['full_name']) : '';
-$email = isset($data['email']) ? trim($data['email']) : '';
-$phone = isset($data['phone']) ? trim($data['phone']) : '';
-$date_of_birth = isset($data['date_of_birth']) ? trim($data['date_of_birth']) : '';
-$gender = isset($data['gender']) ? trim($data['gender']) : '';
-$password = isset($data['password']) ? $data['password'] : '';
-$confirm_password = isset($data['confirm_password']) ? $data['confirm_password'] : '';
-$insurance_company = isset($data['insurance_company']) ? trim($data['insurance_company']) : null;
+$full_name = isset($data['full_name']) ? validateInput($data['full_name']) : '';
+$email = isset($data['email']) ? validateInput($data['email']) : '';
+$phone = isset($data['phone']) ? validateInput($data['phone']) : '';
+$date_of_birth = isset($data['date_of_birth']) ? validateInput($data['date_of_birth']) : '';
+$gender = isset($data['gender']) ? validateInput($data['gender']) : '';
+$password = isset($data['password']) ? validateInput($data['password']) : '';
+$confirm_password = isset($data['confirm_password']) ? validateInput($data['confirm_password']) : '';
+$insurance_company = isset($data['insurance_company']) ? validateInput($data['insurance_company']) : null;
 $insurance_company = normalizeInsuranceCompany($insurance_company);
 
 // Validate all required fields are present and not empty
@@ -32,6 +32,10 @@ if (empty($full_name) || empty($email) || empty($phone) || empty($date_of_birth)
 // Validate email format
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     sendResponse(false, "Invalid email format");
+}
+
+if (!preg_match('/^[0-9+\s\-()+]{7,20}$/', $phone)) {
+    sendResponse(false, "Phone number can only contain numbers, spaces, +, parentheses, and dashes");
 }
 
 // Validate passwords match

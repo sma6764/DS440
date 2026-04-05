@@ -19,17 +19,17 @@ if (!is_array($payload)) {
     sendResponse(false, 'Invalid request payload');
 }
 
-$name = trim($payload['name'] ?? '');
-$address = trim($payload['address'] ?? '');
-$city = trim($payload['city'] ?? '');
-$phone = trim($payload['phone'] ?? '');
+$name = validateInput($payload['name'] ?? '');
+$address = validateInput($payload['address'] ?? '');
+$city = validateInput($payload['city'] ?? '');
+$phone = validateInput($payload['phone'] ?? '');
 
 if ($name === '' || $address === '' || $city === '' || $phone === '') {
     sendResponse(false, 'All fields are required');
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$branchId = isset($payload['branch_id']) ? (int)$payload['branch_id'] : 0;
+$branchId = isset($payload['branch_id']) ? (int)validateInput($payload['branch_id']) : 0;
 
 if ($method === 'PUT' && $branchId <= 0) {
     sendResponse(false, 'branch_id is required for update');

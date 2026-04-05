@@ -9,9 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-requireRole('admin');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+    exit();
+}
 
-$type = isset($_GET['type']) ? trim($_GET['type']) : '';
+$type = isset($_GET['type']) ? validateInput($_GET['type']) : '';
 if ($type === '') {
     sendResponse(false, 'Report type is required');
 }
@@ -40,7 +44,13 @@ if ($type === 'monthly-appointments') {
         ORDER BY appointment_day ASC
     ";
 
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, 'Failed to generate report');
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
     $rows = [];
     while ($row = $result->fetch_assoc()) {
         $rows[] = [
@@ -53,6 +63,7 @@ if ($type === 'monthly-appointments') {
         ];
     }
 
+    $stmt->close();
     $conn->close();
     reportResponse(
         'monthly_appointments_report.csv',
@@ -80,7 +91,13 @@ if ($type === 'doctor-performance') {
         ORDER BY total_appointments DESC, u.full_name ASC
     ";
 
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, 'Failed to generate report');
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
     $rows = [];
     while ($row = $result->fetch_assoc()) {
         $rows[] = [
@@ -94,6 +111,7 @@ if ($type === 'doctor-performance') {
         ];
     }
 
+    $stmt->close();
     $conn->close();
     reportResponse(
         'doctor_performance_report.csv',
@@ -132,7 +150,13 @@ if ($type === 'revenue') {
         LIMIT 12
     ";
 
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, 'Failed to generate report');
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
     $rows = [];
     while ($row = $result->fetch_assoc()) {
         $rows[] = [
@@ -144,6 +168,7 @@ if ($type === 'revenue') {
         ];
     }
 
+    $stmt->close();
     $conn->close();
     reportResponse(
         'revenue_report.csv',
@@ -169,7 +194,13 @@ if ($type === 'patient-demographics') {
         ORDER BY age_group ASC
     ";
 
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, 'Failed to generate report');
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
     $rows = [];
     while ($row = $result->fetch_assoc()) {
         $rows[] = [
@@ -186,7 +217,14 @@ if ($type === 'patient-demographics') {
         ORDER BY total DESC
     ";
 
-    $genderResult = $conn->query($genderSql);
+    $genderStmt = $conn->prepare($genderSql);
+    if (!$genderStmt) {
+        $stmt->close();
+        $conn->close();
+        sendResponse(false, 'Failed to generate report');
+    }
+    $genderStmt->execute();
+    $genderResult = $genderStmt->get_result();
     while ($row = $genderResult->fetch_assoc()) {
         $rows[] = [
             'Gender: ' . $row['gender'],
@@ -194,6 +232,8 @@ if ($type === 'patient-demographics') {
         ];
     }
 
+    $genderStmt->close();
+    $stmt->close();
     $conn->close();
     reportResponse(
         'patient_demographics_report.csv',

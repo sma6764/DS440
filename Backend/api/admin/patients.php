@@ -4,7 +4,11 @@ require_once '../../config/db.php';
 require_once '../../config/helpers.php';
 
 session_start();
-requireRole('admin');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -16,11 +20,14 @@ if ($method === 'GET') {
         ORDER BY created_at DESC
     ";
 
-    $result = $conn->query($sql);
-    if (!$result) {
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
         $conn->close();
         sendResponse(false, 'Failed to fetch patients');
     }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $patients = [];
     while ($row = $result->fetch_assoc()) {
@@ -34,6 +41,7 @@ if ($method === 'GET') {
         ];
     }
 
+    $stmt->close();
     $conn->close();
     sendResponse(true, 'Patients fetched successfully', $patients);
 }
@@ -42,9 +50,9 @@ if ($method === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);
     $patientId = 0;
     if (isset($input['patient_id'])) {
-        $patientId = (int)$input['patient_id'];
+        $patientId = (int)validateInput($input['patient_id']);
     } elseif (isset($input['id'])) {
-        $patientId = (int)$input['id'];
+        $patientId = (int)validateInput($input['id']);
     }
 
     if ($patientId <= 0) {

@@ -25,33 +25,6 @@ function parseRetryAfterSeconds(string $message): ?int {
     return null;
 }
 
-function classifySpecialistFromText(string $text): string {
-    $text = strtolower($text);
-
-    $groups = [
-        'Neurologist' => ['headache', 'migraine', 'dizzy', 'vertigo', 'seizure', 'numbness', 'tingling', 'brain'],
-        'Cardiologist' => ['chest pain', 'chest', 'heart', 'palpitation', 'shortness of breath', 'breathless', 'blood pressure'],
-        'Dermatologist' => ['skin', 'rash', 'acne', 'itch', 'eczema', 'psoriasis', 'mole', 'hives'],
-        'Pediatrician' => ['child', 'kid', 'baby', 'infant', 'toddler', 'my son', 'my daughter'],
-        'Orthopedic' => ['back pain', 'back', 'knee', 'joint', 'bone', 'fracture', 'shoulder', 'hip', 'ankle', 'wrist', 'muscle']
-    ];
-
-    foreach ($groups as $specialist => $keywords) {
-        foreach ($keywords as $keyword) {
-            if (strpos($text, $keyword) !== false) {
-                return $specialist;
-            }
-        }
-    }
-
-    return 'General Practitioner';
-}
-
-function buildFallbackReply(string $specialist): string {
-    $label = $specialist;
-    return "Thanks for sharing your symptoms. Based on what you described, a preliminary recommendation is to see a {$label}. If your symptoms become severe or sudden, please seek urgent medical care right away.";
-}
-
 function callGeminiModel(array $payload, string $model): array {
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model
          . ':generateContent?key=' . GEMINI_API_KEY;
@@ -124,9 +97,9 @@ $systemInstruction = [
         '- Always recommend exactly ONE specialist in every response, even with limited information.' . "\n" .
         '- If details are limited, state this is a preliminary recommendation and optionally ask one short follow-up question.' . "\n" .
         '- Add this exact line at the very END of your response on its own line:' . "\n" .
-        '  SPECIALIST_RECOMMENDATION: [specialist name]' . "\n" .
-        '  Example: SPECIALIST_RECOMMENDATION: Neurologist' . "\n" .
-        '- Include SPECIALIST_RECOMMENDATION in EVERY response.'
+        '  SPECIALIST: [specialist name]' . "\n" .
+        '  Example: SPECIALIST: Neurologist' . "\n" .
+        '- Include SPECIALIST in EVERY response.'
     ]]
 ];
 
@@ -143,8 +116,9 @@ $payload = [
     'system_instruction' => $systemInstruction,
     'contents'           => $contents,
     'generationConfig'   => [
-        'temperature'     => 0.7,
-        'maxOutputTokens' => 512
+        'temperature'     => 0.4,
+        'maxOutputTokens' => 1024,
+        'stopSequences'   => []
     ]
 ];
 
@@ -229,9 +203,9 @@ if ($httpCode !== 200) {
 }
 
 $data      = json_decode($response, true);
-$replyText = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+$rawReply  = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-if ($replyText === '') {
+if ($rawReply === '') {
     http_response_code(200);
     echo json_encode([
         'success' => false,
@@ -241,20 +215,17 @@ if ($replyText === '') {
     exit;
 }
 
-// Extract specialist recommendation tag if present, then strip it from visible text
+// Extract only the SPECIALIST line for app logic; keep the rest of Gemini's reply intact.
 $specialist = null;
-if (preg_match('/SPECIALIST_RECOMMENDATION:\s*(.+)/i', $replyText, $matches)) {
+if (preg_match('/^SPECIALIST:\s*(.+)$/mi', $rawReply, $matches)) {
     $specialist = trim($matches[1]);
-    $replyText  = trim(preg_replace('/SPECIALIST_RECOMMENDATION:\s*.+/i', '', $replyText));
 }
 
-// Safety net: if the model omits the recommendation tag, classify from latest user input.
-if ($specialist === null) {
-    $specialist = classifySpecialistFromText($lastUserMessage);
-}
+$visibleReply = preg_replace('/^SPECIALIST:\s*.*(?:\r?\n|$)/mi', '', $rawReply);
 
 echo json_encode([
-    'success'    => true,
-    'reply'      => $replyText,
-    'specialist' => $specialist
+    'success'     => true,
+    'raw_reply'    => $rawReply,
+    'reply'        => $visibleReply,
+    'specialist'   => $specialist
 ]);

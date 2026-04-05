@@ -5,21 +5,26 @@ require_once '../config/helpers.php';
 
 session_start();
 
+requireLogin();
+
+$currentRole = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : '';
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Handle POST - Create new booking
 if ($method === 'POST') {
-    // Require user to be logged in
-    requireLogin();
+    if ($currentRole !== 'patient') {
+        sendResponse(false, "Forbidden. Patient access required.", null, "FORBIDDEN");
+    }
     
     // Read JSON input
     $data = json_decode(file_get_contents("php://input"), true);
     
     // Extract fields
-    $doctor_id = isset($data['doctor_id']) ? intval($data['doctor_id']) : 0;
-    $branch_id = isset($data['branch_id']) ? intval($data['branch_id']) : 0;
-    $appointment_date = isset($data['appointment_date']) ? trim($data['appointment_date']) : '';
-    $appointment_time = isset($data['appointment_time']) ? trim($data['appointment_time']) : '';
+    $doctor_id = isset($data['doctor_id']) ? (int)validateInput($data['doctor_id']) : 0;
+    $branch_id = isset($data['branch_id']) ? (int)validateInput($data['branch_id']) : 0;
+    $appointment_date = isset($data['appointment_date']) ? validateInput($data['appointment_date']) : '';
+    $appointment_time = isset($data['appointment_time']) ? validateInput($data['appointment_time']) : '';
 
     // If branch_id is missing, derive it from selected doctor.
     if (!$branch_id && $doctor_id) {
@@ -105,13 +110,8 @@ if ($method === 'POST') {
 
 // Handle GET - Get single booking details
 else if ($method === 'GET') {
-    // Check if user is logged in
-    if (!isset($_SESSION['user_id'])) {
-        sendResponse(false, "Please log in to view appointment details");
-    }
-    
     // Get appointment_id parameter
-    $appointment_id = isset($_GET['appointment_id']) ? intval($_GET['appointment_id']) : 0;
+    $appointment_id = isset($_GET['appointment_id']) ? (int)validateInput($_GET['appointment_id']) : 0;
     
     if (!$appointment_id) {
         sendResponse(false, "Appointment ID is required");

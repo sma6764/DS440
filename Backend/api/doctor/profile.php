@@ -9,7 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-requireRole('doctor');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    sendResponse(false, "Forbidden. Doctor access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $userId = (int)$_SESSION['user_id'];
 
@@ -21,8 +25,7 @@ $sql = "
         u.phone,
         s.name AS specialty,
         b.name AS branch,
-        d.bio,
-        d.rating
+        d.bio
     FROM doctors d
     JOIN users u ON d.user_id = u.id
     LEFT JOIN specialists s ON d.specialist_id = s.id
@@ -59,7 +62,6 @@ sendResponse(true, 'Doctor profile retrieved successfully', [
     'phone' => $doctor['phone'],
     'specialty' => $doctor['specialty'],
     'branch' => $doctor['branch'],
-    'bio' => $doctor['bio'],
-    'rating' => $doctor['rating'] !== null ? (float)$doctor['rating'] : null
+    'bio' => $doctor['bio']
 ]);
 ?>

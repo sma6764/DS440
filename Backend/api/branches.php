@@ -9,8 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Get optional city filter
-$city = isset($_GET['city']) ? trim($_GET['city']) : null;
-$branchId = isset($_GET['branch_id']) ? (int)$_GET['branch_id'] : 0;
+$city = isset($_GET['city']) ? validateInput($_GET['city']) : null;
+$branchId = isset($_GET['branch_id']) ? (int)validateInput($_GET['branch_id']) : 0;
 
 // Build query
 $query = "
@@ -54,14 +54,12 @@ if ($city) {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
+    $stmt = $conn->prepare($query);
     if ($branchId > 0) {
-        $stmt = $conn->prepare($query);
         $stmt->bind_param("i", $branchId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    } else {
-        $result = $conn->query($query);
     }
+    $stmt->execute();
+    $result = $stmt->get_result();
 }
 
 $branches = [];

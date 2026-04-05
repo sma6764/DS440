@@ -4,7 +4,11 @@ require_once '../../config/db.php';
 require_once '../../config/helpers.php';
 
 session_start();
-requireRole('doctor');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    sendResponse(false, "Forbidden. Doctor access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $userId = (int)$_SESSION['user_id'];
 
@@ -27,7 +31,7 @@ $doctorStmt->close();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $statusFilter = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+    $statusFilter = isset($_GET['status']) ? validateInput($_GET['status']) : '';
     $allowedStatusFilters = ['pending', 'confirmed', 'cancelled', 'completed'];
     $hasStatusFilter = in_array($statusFilter, $allowedStatusFilters, true);
 
@@ -90,11 +94,11 @@ if ($method === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
     $appointmentId = 0;
     if (isset($input['appointment_id'])) {
-        $appointmentId = (int)$input['appointment_id'];
+        $appointmentId = (int)validateInput($input['appointment_id']);
     } elseif (isset($input['id'])) {
-        $appointmentId = (int)$input['id'];
+        $appointmentId = (int)validateInput($input['id']);
     }
-    $newStatus = isset($input['status']) ? trim((string)$input['status']) : '';
+    $newStatus = isset($input['status']) ? validateInput($input['status']) : '';
 
     $allowedStatuses = ['confirmed', 'cancelled'];
     if ($appointmentId <= 0 || !in_array($newStatus, $allowedStatuses, true)) {
@@ -102,7 +106,7 @@ if ($method === 'PUT') {
         sendResponse(false, 'Invalid appointment update request');
     }
 
-    $checkStmt = $conn->prepare('SELECT id FROM appointments WHERE id = ? AND doctor_id = ? LIMIT 1');
+    $checkStmt = $conn->prepare('SELECT id, patient_id, doctor_id, appointment_date, appointment_time, status FROM appointments WHERE id = ? AND doctor_id = ? LIMIT 1');
     if (!$checkStmt) {
         $conn->close();
         sendResponse(false, 'Could not load data. Please try again.');
@@ -115,7 +119,19 @@ if ($method === 'PUT') {
         $conn->close();
         sendResponse(false, 'Appointment not found for this doctor');
     }
+    $appointment = $checkResult->fetch_assoc();
     $checkStmt->close();
+
+    $currentStatus = (string)($appointment['status'] ?? '');
+    $allowedTransitions = [
+        'pending' => ['confirmed', 'cancelled'],
+        'confirmed' => ['cancelled']
+    ];
+
+    if (!isset($allowedTransitions[$currentStatus]) || !in_array($newStatus, $allowedTransitions[$currentStatus], true)) {
+        $conn->close();
+        sendResponse(false, 'This appointment status cannot be changed');
+    }
 
     $updateStmt = $conn->prepare('UPDATE appointments SET status = ? WHERE id = ? AND doctor_id = ?');
     if (!$updateStmt) {
@@ -126,10 +142,30 @@ if ($method === 'PUT') {
     $updateStmt->execute();
     $updateStmt->close();
 
+    $responseStmt = $conn->prepare('SELECT id, patient_id, doctor_id, appointment_date, appointment_time, status FROM appointments WHERE id = ? LIMIT 1');
+    if (!$responseStmt) {
+        $conn->close();
+        sendResponse(false, 'Could not load data. Please try again.');
+    }
+    $responseStmt->bind_param('i', $appointmentId);
+    $responseStmt->execute();
+    $responseResult = $responseStmt->get_result();
+    $updatedAppointment = $responseResult ? $responseResult->fetch_assoc() : null;
+    $responseStmt->close();
+
     $conn->close();
     sendResponse(true, 'Appointment updated', [
-        'id' => $appointmentId,
-        'status' => $newStatus
+        'appointment' => $updatedAppointment ? [
+            'id' => (int)$updatedAppointment['id'],
+            'patient_id' => (int)$updatedAppointment['patient_id'],
+            'doctor_id' => (int)$updatedAppointment['doctor_id'],
+            'appointment_date' => $updatedAppointment['appointment_date'],
+            'appointment_time' => $updatedAppointment['appointment_time'],
+            'status' => $updatedAppointment['status']
+        ] : [
+            'id' => $appointmentId,
+            'status' => $newStatus
+        ]
     ]);
 }
 

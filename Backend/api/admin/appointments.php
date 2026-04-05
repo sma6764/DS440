@@ -5,15 +5,22 @@ require_once '../../config/helpers.php';
 
 session_start();
 
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-requireRole('admin');
-
-$dateFilter = isset($_GET['date']) ? trim((string)$_GET['date']) : '';
+$dateFilter = isset($_GET['date']) ? validateInput($_GET['date']) : '';
 $todayOnly = strtolower($dateFilter) === 'today';
-$monthFilter = isset($_GET['month']) ? trim((string)$_GET['month']) : '';
+$monthFilter = isset($_GET['month']) ? validateInput($_GET['month']) : '';
+$statusFilter = isset($_GET['status']) ? strtolower(validateInput($_GET['status'])) : '';
+$allowedStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+$hasStatusFilter = in_array($statusFilter, $allowedStatuses, true);
 $monthYear = 0;
 $monthNumber = 0;
 $hasMonthFilter = false;
@@ -32,6 +39,9 @@ $whereClauses = [];
 if ($todayOnly) {
     $whereClauses[] = 'a.appointment_date = CURDATE()';
 }
+if ($hasStatusFilter) {
+    $whereClauses[] = 'a.status = ?';
+}
 if ($hasMonthFilter) {
     $whereClauses[] = 'YEAR(a.appointment_date) = ? AND MONTH(a.appointment_date) = ?';
 }
@@ -44,6 +54,8 @@ if (!empty($whereClauses)) {
 $sql = "
     SELECT
         a.id,
+        a.doctor_id,
+        a.patient_id,
         u.full_name AS patient_name,
         doc.full_name AS doctor_name,
         s.name AS specialty,
@@ -61,17 +73,29 @@ $sql = "
     ORDER BY a.appointment_date DESC
 ";
 
-if ($hasMonthFilter) {
+if ($hasMonthFilter || $hasStatusFilter) {
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         $conn->close();
         sendResponse(false, 'Failed to prepare appointments query');
     }
-    $stmt->bind_param('ii', $monthYear, $monthNumber);
+    if ($hasMonthFilter && $hasStatusFilter) {
+        $stmt->bind_param('sii', $statusFilter, $monthYear, $monthNumber);
+    } elseif ($hasMonthFilter) {
+        $stmt->bind_param('ii', $monthYear, $monthNumber);
+    } else {
+        $stmt->bind_param('s', $statusFilter);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, 'Failed to prepare appointments query');
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
 }
 
 if (!$result) {
@@ -86,6 +110,8 @@ $appointments = [];
 while ($row = $result->fetch_assoc()) {
     $appointments[] = [
         'id' => (int)$row['id'],
+        'doctor_id' => (int)$row['doctor_id'],
+        'patient_id' => (int)$row['patient_id'],
         'patient_name' => $row['patient_name'],
         'doctor_name' => $row['doctor_name'],
         'specialty' => $row['specialty'],

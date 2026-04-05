@@ -19,23 +19,21 @@ if (!is_array($payload)) {
     sendResponse(false, 'Invalid request payload');
 }
 
-$fullName = trim($payload['full_name'] ?? '');
-$email = trim($payload['email'] ?? '');
-$password = (string)($payload['password'] ?? '');
-$confirmPassword = (string)($payload['confirm_password'] ?? '');
-$phone = trim($payload['phone'] ?? '');
-$dateOfBirth = trim($payload['date_of_birth'] ?? '');
-$gender = trim($payload['gender'] ?? '');
-$specialistId = (int)($payload['specialist_id'] ?? 0);
-$branchId = (int)($payload['branch_id'] ?? 0);
-$bio = trim($payload['bio'] ?? '');
-$rating = $payload['rating'] ?? null;
-$rating = is_numeric($rating) ? (float)$rating : null;
+$fullName = validateInput($payload['full_name'] ?? '');
+$email = validateInput($payload['email'] ?? '');
+$password = validateInput($payload['password'] ?? '');
+$confirmPassword = validateInput($payload['confirm_password'] ?? '');
+$phone = validateInput($payload['phone'] ?? '');
+$dateOfBirth = validateInput($payload['date_of_birth'] ?? '');
+$gender = validateInput($payload['gender'] ?? '');
+$specialistId = (int)validateInput($payload['specialist_id'] ?? 0);
+$branchId = (int)validateInput($payload['branch_id'] ?? 0);
+$bio = validateInput($payload['bio'] ?? '');
 
 if (
     $fullName === '' || $email === '' || $password === '' || $confirmPassword === '' ||
     $phone === '' || $dateOfBirth === '' || $gender === '' ||
-    $specialistId <= 0 || $branchId <= 0 || $bio === '' || $rating === null
+    $specialistId <= 0 || $branchId <= 0 || $bio === ''
 ) {
     sendResponse(false, 'All fields are required');
 }
@@ -44,12 +42,12 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     sendResponse(false, 'Invalid email format');
 }
 
-if ($password !== $confirmPassword) {
-    sendResponse(false, 'Passwords do not match');
+if (!preg_match('/^[0-9+\s\-()+]{7,20}$/', $phone)) {
+    sendResponse(false, 'Phone number can only contain numbers, spaces, +, parentheses, and dashes');
 }
 
-if ($rating < 0 || $rating > 5) {
-    sendResponse(false, 'Rating must be between 0.0 and 5.0');
+if ($password !== $confirmPassword) {
+    sendResponse(false, 'Passwords do not match');
 }
 
 $allowedGenders = ['Male', 'Female', 'Prefer not to say'];
@@ -91,7 +89,7 @@ if (!$branchExists) {
 $conn->begin_transaction();
 
 try {
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $passwordHash = password_hash($password, PASSWORD_BCRYPT);
     if ($passwordHash === false) {
         throw new Exception('Failed to hash password');
     }
@@ -109,9 +107,9 @@ try {
     $insertUserStmt->close();
 
     $insertDoctorStmt = $conn->prepare(
-        'INSERT INTO doctors (user_id, specialist_id, branch_id, bio, rating) VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO doctors (user_id, specialist_id, branch_id, bio) VALUES (?, ?, ?, ?)'
     );
-    $insertDoctorStmt->bind_param('iiisd', $userId, $specialistId, $branchId, $bio, $rating);
+    $insertDoctorStmt->bind_param('iiis', $userId, $specialistId, $branchId, $bio);
 
     if (!$insertDoctorStmt->execute()) {
         throw new Exception('Failed to create doctor profile');

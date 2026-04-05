@@ -9,7 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-requireRole('doctor');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    sendResponse(false, "Forbidden. Doctor access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $userId = (int)$_SESSION['user_id'];
 

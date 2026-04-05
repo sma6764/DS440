@@ -13,13 +13,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Handle GET requests - Fetch appointments
 if ($method === 'GET') {
     // Get type parameter (upcoming, past, or all)
-    $type = isset($_GET['type']) ? $_GET['type'] : 'upcoming';
+    $type = isset($_GET['type']) ? validateInput($_GET['type']) : 'upcoming';
     
     // Check for admin override
     $targetPatientId = $_SESSION['user_id'];
     if ($_SESSION['user_role'] === 'admin' && isset($_GET['patient_id'])) {
         // Admin is trying to fetch another patient's appointments
-        $targetPatientId = intval($_GET['patient_id']);
+        $targetPatientId = (int)validateInput($_GET['patient_id']);
         
         // If the provided patient_id is invalid or zero, use the session user's ID
         if ($targetPatientId <= 0) {
@@ -85,7 +85,7 @@ if ($method === 'GET') {
             JOIN branches b ON a.branch_id = b.id
             WHERE a.patient_id = ?
             AND a.status IN ('pending', 'confirmed')
-            AND a.appointment_date > CURDATE()
+            AND a.appointment_date >= CURDATE()
             ORDER BY a.appointment_date ASC, a.appointment_time ASC
         ";
     }
@@ -121,7 +121,7 @@ if ($method === 'GET') {
 else if ($method === 'DELETE') {
     // Read JSON input
     $data = json_decode(file_get_contents("php://input"), true);
-    $appointmentId = isset($data['id']) ? intval($data['id']) : 0;
+    $appointmentId = isset($data['id']) ? (int)validateInput($data['id']) : 0;
     
     if ($appointmentId <= 0) {
         sendResponse(false, "Invalid appointment ID");

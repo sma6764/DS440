@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $targetUserId = $_SESSION['user_id'];
 if ($_SESSION['user_role'] === 'admin' && isset($_GET['patient_id'])) {
     // Admin is trying to fetch another patient's profile
-    $targetUserId = intval($_GET['patient_id']);
+    $targetUserId = (int)validateInput($_GET['patient_id']);
     
     // If the provided patient_id is invalid or zero, use the admin's own ID
     if ($targetUserId <= 0) {

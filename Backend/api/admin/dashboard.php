@@ -5,11 +5,15 @@ require_once '../../config/helpers.php';
 
 session_start();
 
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
-
-requireRole('admin');
 
 $data = [
     'stats' => [
@@ -33,7 +37,13 @@ $statsSql = "
         (SELECT COUNT(*) FROM appointments WHERE appointment_date = CURDATE() AND status <> 'cancelled') AS todays_appointments,
         (SELECT COUNT(*) FROM branches) AS total_branches
 ";
-$statsResult = $conn->query($statsSql);
+$statsStmt = $conn->prepare($statsSql);
+if (!$statsStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$statsStmt->execute();
+$statsResult = $statsStmt->get_result();
 if ($statsResult && $statsResult->num_rows > 0) {
     $row = $statsResult->fetch_assoc();
     $data['stats'] = [
@@ -43,6 +53,7 @@ if ($statsResult && $statsResult->num_rows > 0) {
         'total_branches' => (int)$row['total_branches']
     ];
 }
+$statsStmt->close();
 
 // Recent activity (latest 5 appointments)
 $activitySql = "
@@ -59,7 +70,13 @@ $activitySql = "
     ORDER BY a.created_at DESC
     LIMIT 5
 ";
-$activityResult = $conn->query($activitySql);
+$activityStmt = $conn->prepare($activitySql);
+if (!$activityStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$activityStmt->execute();
+$activityResult = $activityStmt->get_result();
 if ($activityResult) {
     while ($row = $activityResult->fetch_assoc()) {
         $data['recent_activity'][] = [
@@ -68,6 +85,7 @@ if ($activityResult) {
         ];
     }
 }
+$activityStmt->close();
 
 // Doctors list
 $doctorsSql = "
@@ -82,7 +100,13 @@ $doctorsSql = "
     JOIN branches b ON d.branch_id = b.id
     ORDER BY u.full_name ASC
 ";
-$doctorsResult = $conn->query($doctorsSql);
+$doctorsStmt = $conn->prepare($doctorsSql);
+if (!$doctorsStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$doctorsStmt->execute();
+$doctorsResult = $doctorsStmt->get_result();
 if ($doctorsResult) {
     while ($row = $doctorsResult->fetch_assoc()) {
         $data['doctors'][] = [
@@ -93,6 +117,7 @@ if ($doctorsResult) {
         ];
     }
 }
+$doctorsStmt->close();
 
 // Patients list
 $patientsSql = "
@@ -101,7 +126,13 @@ $patientsSql = "
     WHERE role = 'patient'
     ORDER BY created_at DESC
 ";
-$patientsResult = $conn->query($patientsSql);
+$patientsStmt = $conn->prepare($patientsSql);
+if (!$patientsStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$patientsStmt->execute();
+$patientsResult = $patientsStmt->get_result();
 if ($patientsResult) {
     while ($row = $patientsResult->fetch_assoc()) {
         $data['patients'][] = [
@@ -112,6 +143,7 @@ if ($patientsResult) {
         ];
     }
 }
+$patientsStmt->close();
 
 // Branch cards
 $branchesSql = "
@@ -128,7 +160,13 @@ $branchesSql = "
     GROUP BY b.id, b.name, b.address, b.city
     ORDER BY b.name ASC
 ";
-$branchesResult = $conn->query($branchesSql);
+$branchesStmt = $conn->prepare($branchesSql);
+if (!$branchesStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$branchesStmt->execute();
+$branchesResult = $branchesStmt->get_result();
 if ($branchesResult) {
     while ($row = $branchesResult->fetch_assoc()) {
         $data['branches'][] = [
@@ -140,6 +178,7 @@ if ($branchesResult) {
         ];
     }
 }
+$branchesStmt->close();
 
 // Appointments table
 $appointmentsSql = "
@@ -158,7 +197,13 @@ $appointmentsSql = "
     ORDER BY a.appointment_date DESC, a.appointment_time DESC
     LIMIT 50
 ";
-$appointmentsResult = $conn->query($appointmentsSql);
+$appointmentsStmt = $conn->prepare($appointmentsSql);
+if (!$appointmentsStmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to load dashboard data');
+}
+$appointmentsStmt->execute();
+$appointmentsResult = $appointmentsStmt->get_result();
 if ($appointmentsResult) {
     while ($row = $appointmentsResult->fetch_assoc()) {
         $data['appointments'][] = [
@@ -171,6 +216,7 @@ if ($appointmentsResult) {
         ];
     }
 }
+$appointmentsStmt->close();
 
 $conn->close();
 

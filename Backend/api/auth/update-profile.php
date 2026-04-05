@@ -40,9 +40,9 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $fullName = isset($input['full_name']) ? trim((string)$input['full_name']) : '';
-    $email = isset($input['email']) ? trim((string)$input['email']) : '';
-    $phone = isset($input['phone']) ? trim((string)$input['phone']) : '';
+    $fullName = isset($input['full_name']) ? validateInput($input['full_name']) : '';
+    $email = isset($input['email']) ? validateInput($input['email']) : '';
+    $phone = isset($input['phone']) ? validateInput($input['phone']) : '';
 
     if ($fullName === '' || $email === '') {
         $conn->close();
@@ -52,6 +52,11 @@ if ($method === 'POST') {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $conn->close();
         sendResponse(false, 'Please provide a valid email address');
+    }
+
+    if ($phone !== '' && !preg_match('/^[0-9+\s\-()+]{7,20}$/', $phone)) {
+        $conn->close();
+        sendResponse(false, 'Phone number can only contain numbers, spaces, +, parentheses, and dashes');
     }
 
     $emailCheck = $conn->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');

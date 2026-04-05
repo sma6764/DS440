@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 // Mode 1: Coverage check for specific specialist (?specialist=X)
 if (isset($_GET['specialist'])) {
-  $specialistName = trim($_GET['specialist']);
+  $specialistName = validateInput($_GET['specialist']);
   
   if (empty($specialistName)) {
     sendResponse(false, "Specialist name is required");
@@ -71,7 +71,14 @@ elseif (isset($_GET['table'])) {
           JOIN specialists s ON ic.specialist_id = s.id
           ORDER BY s.name ASC, ic.insurance_company ASC";
   
-  $result = $conn->query($sql);
+  $stmt = $conn->prepare($sql);
+  if (!$stmt) {
+    $conn->close();
+    sendResponse(false, "Could not load pricing table");
+  }
+
+  $stmt->execute();
+  $result = $stmt->get_result();
 
   $pricingData = [];
   while ($row = $result->fetch_assoc()) {
@@ -83,6 +90,8 @@ elseif (isset($_GET['table'])) {
       'copay_percent' => 100 - (int)$row['coverage_percent']
     ];
   }
+
+  $stmt->close();
 
   sendResponse(true, "Pricing table retrieved", $pricingData);
 }

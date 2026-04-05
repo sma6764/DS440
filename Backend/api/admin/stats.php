@@ -11,17 +11,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Require admin role
-requireRole('admin');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+  sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+  exit();
+}
 
 // Get total active doctors count
 $doctorsQuery = "SELECT COUNT(*) as count FROM doctors WHERE is_active = 1";
-$doctorsResult = $conn->query($doctorsQuery);
+$doctorsStmt = $conn->prepare($doctorsQuery);
+if (!$doctorsStmt) {
+  $conn->close();
+  sendResponse(false, "Failed to retrieve admin stats");
+}
+$doctorsStmt->execute();
+$doctorsResult = $doctorsStmt->get_result();
 $totalDoctors = $doctorsResult->fetch_assoc()['count'];
+$doctorsStmt->close();
 
 // Get total patients count (users with role 'patient')
 $patientsQuery = "SELECT COUNT(*) as count FROM users WHERE role = 'patient'";
-$patientsResult = $conn->query($patientsQuery);
+$patientsStmt = $conn->prepare($patientsQuery);
+if (!$patientsStmt) {
+  $conn->close();
+  sendResponse(false, "Failed to retrieve admin stats");
+}
+$patientsStmt->execute();
+$patientsResult = $patientsStmt->get_result();
 $totalPatients = $patientsResult->fetch_assoc()['count'];
+$patientsStmt->close();
 
 // Get today's appointments count
 $todayDate = date('Y-m-d');
@@ -35,8 +53,15 @@ $stmt->close();
 
 // Get total branches count
 $branchesQuery = "SELECT COUNT(*) as count FROM branches";
-$branchesResult = $conn->query($branchesQuery);
+$branchesStmt = $conn->prepare($branchesQuery);
+if (!$branchesStmt) {
+  $conn->close();
+  sendResponse(false, "Failed to retrieve admin stats");
+}
+$branchesStmt->execute();
+$branchesResult = $branchesStmt->get_result();
 $totalBranches = $branchesResult->fetch_assoc()['count'];
+$branchesStmt->close();
 
 $data = [
   'total_doctors' => (int)$totalDoctors,

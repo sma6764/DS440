@@ -13,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $userId = (int)$_SESSION['user_id'];
 $input = json_decode(file_get_contents('php://input'), true);
 
-$currentPassword = isset($input['current_password']) ? (string)$input['current_password'] : '';
-$newPassword = isset($input['new_password']) ? (string)$input['new_password'] : '';
-$confirmPassword = isset($input['confirm_password']) ? (string)$input['confirm_password'] : '';
+$currentPassword = isset($input['current_password']) ? validateInput($input['current_password']) : '';
+$newPassword = isset($input['new_password']) ? validateInput($input['new_password']) : '';
+$confirmPassword = isset($input['confirm_password']) ? validateInput($input['confirm_password']) : '';
 
 if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
     $conn->close();

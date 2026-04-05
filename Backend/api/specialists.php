@@ -7,8 +7,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse(false, 'Method not allowed');
 }
 
-$sql = 'SELECT id, name FROM specialists ORDER BY name ASC';
-$result = $conn->query($sql);
+$stmt = $conn->prepare('SELECT id, name FROM specialists ORDER BY name ASC');
+if (!$stmt) {
+    $conn->close();
+    sendResponse(false, 'Failed to fetch specialists');
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 $specialists = [];
 while ($row = $result->fetch_assoc()) {

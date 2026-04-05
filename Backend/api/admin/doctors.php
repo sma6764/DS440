@@ -4,12 +4,16 @@ require_once '../../config/db.php';
 require_once '../../config/helpers.php';
 
 session_start();
-requireRole('admin');
+requireLogin();
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    sendResponse(false, "Forbidden. Admin access required.", null, "FORBIDDEN");
+    exit();
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $doctorIdParam = isset($_GET['doctor_id']) ? (int)$_GET['doctor_id'] : 0;
+    $doctorIdParam = isset($_GET['doctor_id']) ? (int)validateInput($_GET['doctor_id']) : 0;
 
     if ($doctorIdParam > 0) {
         $sql = "
@@ -18,7 +22,6 @@ if ($method === 'GET') {
                 d.specialist_id,
                 d.branch_id,
                 d.bio,
-                d.rating,
                 d.is_active,
                 u.full_name,
                 u.email,
@@ -55,7 +58,6 @@ if ($method === 'GET') {
             'specialist_id' => (int)$row['specialist_id'],
             'branch_id' => (int)$row['branch_id'],
             'bio' => $row['bio'],
-            'rating' => $row['rating'] !== null ? (float)$row['rating'] : null,
             'is_active' => (int)$row['is_active'] === 1,
             'full_name' => $row['full_name'],
             'email' => $row['email'],
@@ -73,7 +75,6 @@ if ($method === 'GET') {
             u.phone,
             s.name AS specialty,
             b.name AS branch,
-            d.rating,
             d.is_active
         FROM doctors d
         JOIN users u ON d.user_id = u.id
@@ -82,11 +83,14 @@ if ($method === 'GET') {
         ORDER BY u.full_name ASC
     ";
 
-    $result = $conn->query($sql);
-    if (!$result) {
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
         $conn->close();
         sendResponse(false, 'Failed to fetch doctors');
     }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     $doctors = [];
     while ($row = $result->fetch_assoc()) {
@@ -97,7 +101,6 @@ if ($method === 'GET') {
             'phone' => $row['phone'],
             'specialty' => $row['specialty'],
             'branch' => $row['branch'],
-            'rating' => $row['rating'] !== null ? (float)$row['rating'] : null,
             'is_active' => (int)$row['is_active'] === 1
         ];
     }
@@ -115,7 +118,7 @@ if ($method === 'PUT') {
         $doctorId = (int)$input['id'];
     }
 
-    $isActive = isset($input['is_active']) ? (int)$input['is_active'] : null;
+    $isActive = isset($input['is_active']) ? (int)validateInput($input['is_active']) : null;
 
     if ($doctorId <= 0) {
         $conn->close();
@@ -148,7 +151,6 @@ if ($method === 'PUT') {
         !isset($input['specialist_id']) &&
         !isset($input['branch_id']) &&
         !isset($input['bio']) &&
-        !isset($input['rating']) &&
         !isset($input['password']) &&
         !isset($input['confirm_password']);
 
@@ -177,22 +179,20 @@ if ($method === 'PUT') {
         ]);
     }
 
-    $fullName = trim((string)($input['full_name'] ?? ''));
-    $email = trim((string)($input['email'] ?? ''));
-    $phone = trim((string)($input['phone'] ?? ''));
-    $dateOfBirth = trim((string)($input['date_of_birth'] ?? ''));
-    $gender = trim((string)($input['gender'] ?? ''));
-    $specialistId = (int)($input['specialist_id'] ?? 0);
-    $branchId = (int)($input['branch_id'] ?? 0);
-    $bio = trim((string)($input['bio'] ?? ''));
-    $ratingRaw = $input['rating'] ?? null;
-    $rating = is_numeric($ratingRaw) ? (float)$ratingRaw : null;
-    $password = (string)($input['password'] ?? '');
-    $confirmPassword = (string)($input['confirm_password'] ?? '');
+    $fullName = validateInput($input['full_name'] ?? '');
+    $email = validateInput($input['email'] ?? '');
+    $phone = validateInput($input['phone'] ?? '');
+    $dateOfBirth = validateInput($input['date_of_birth'] ?? '');
+    $gender = validateInput($input['gender'] ?? '');
+    $specialistId = (int)validateInput($input['specialist_id'] ?? 0);
+    $branchId = (int)validateInput($input['branch_id'] ?? 0);
+    $bio = validateInput($input['bio'] ?? '');
+    $password = validateInput($input['password'] ?? '');
+    $confirmPassword = validateInput($input['confirm_password'] ?? '');
 
     if (
         $fullName === '' || $email === '' || $phone === '' || $dateOfBirth === '' ||
-        $gender === '' || $specialistId <= 0 || $branchId <= 0 || $bio === '' || $rating === null
+        $gender === '' || $specialistId <= 0 || $branchId <= 0 || $bio === ''
     ) {
         $conn->close();
         sendResponse(false, 'All required fields must be provided for update');
@@ -203,9 +203,9 @@ if ($method === 'PUT') {
         sendResponse(false, 'Invalid email format');
     }
 
-    if ($rating < 0 || $rating > 5) {
+    if (!preg_match('/^[0-9+\s\-()+]{7,20}$/', $phone)) {
         $conn->close();
-        sendResponse(false, 'Rating must be between 0.0 and 5.0');
+        sendResponse(false, 'Phone number can only contain numbers, spaces, +, parentheses, and dashes');
     }
 
     $allowedGenders = ['Male', 'Female', 'Prefer not to say'];
@@ -291,7 +291,7 @@ if ($method === 'PUT') {
         $updateUserStmt->close();
 
         if ($password !== '' && $confirmPassword !== '') {
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT);
             if ($passwordHash === false) {
                 throw new Exception('Failed to hash password');
             }
@@ -306,11 +306,11 @@ if ($method === 'PUT') {
             $passwordStmt->close();
         }
 
-        $updateDoctorStmt = $conn->prepare('UPDATE doctors SET specialist_id = ?, branch_id = ?, bio = ?, rating = ? WHERE id = ?');
+        $updateDoctorStmt = $conn->prepare('UPDATE doctors SET specialist_id = ?, branch_id = ?, bio = ? WHERE id = ?');
         if (!$updateDoctorStmt) {
             throw new Exception('Failed to prepare doctor update');
         }
-        $updateDoctorStmt->bind_param('iisdi', $specialistId, $branchId, $bio, $rating, $doctorId);
+        $updateDoctorStmt->bind_param('iisi', $specialistId, $branchId, $bio, $doctorId);
         if (!$updateDoctorStmt->execute()) {
             throw new Exception('Failed to update doctor details');
         }

@@ -9,9 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Get URL parameters
-$specialist = isset($_GET['specialist']) ? trim($_GET['specialist']) : null;
-$branch_id = isset($_GET['branch_id']) ? intval($_GET['branch_id']) : null;
-$doctor_id = isset($_GET['doctor_id']) ? intval($_GET['doctor_id']) : null;
+$specialist = isset($_GET['specialist']) ? validateInput($_GET['specialist']) : null;
+$branch_id = isset($_GET['branch_id']) ? (int)validateInput($_GET['branch_id']) : null;
+$doctor_id = isset($_GET['doctor_id']) ? (int)validateInput($_GET['doctor_id']) : null;
 
 // If doctor_id is provided, return full details of that one doctor
 if ($doctor_id) {
@@ -23,7 +23,6 @@ if ($doctor_id) {
             b.name as branch,
             d.branch_id,
             d.bio,
-            d.rating,
             d.is_active
         FROM doctors d
         JOIN users u ON d.user_id = u.id
@@ -54,7 +53,6 @@ if ($doctor_id) {
         'branch' => $doctor['branch'],
         'branch_id' => $doctor['branch_id'],
         'bio' => $doctor['bio'],
-        'rating' => floatval($doctor['rating']),
         'is_active' => (bool)$doctor['is_active']
     ]);
 }
@@ -68,7 +66,6 @@ $query = "
         b.name as branch,
         d.branch_id,
         d.bio,
-        d.rating,
         d.is_active
     FROM doctors d
     JOIN users u ON d.user_id = u.id
@@ -94,8 +91,8 @@ if ($branch_id) {
     $types .= "i";
 }
 
-// Order by rating (highest first)
-$query .= " ORDER BY d.rating DESC";
+// Order alphabetically by doctor name
+$query .= " ORDER BY u.full_name ASC";
 
 // Prepare and execute query
 if (count($params) > 0) {
@@ -104,7 +101,14 @@ if (count($params) > 0) {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $conn->query($query);
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        $conn->close();
+        sendResponse(false, "Failed to fetch doctors");
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
 }
 
 $doctors = [];
@@ -116,7 +120,6 @@ while ($row = $result->fetch_assoc()) {
         'branch' => $row['branch'],
         'branch_id' => $row['branch_id'],
         'bio' => $row['bio'],
-        'rating' => floatval($row['rating']),
         'is_active' => (bool)$row['is_active']
     ];
 }

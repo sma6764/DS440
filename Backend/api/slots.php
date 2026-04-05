@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Get URL parameters
-$doctor_id = isset($_GET['doctor_id']) ? intval($_GET['doctor_id']) : 0;
-$date = isset($_GET['date']) ? trim($_GET['date']) : '';
+$doctor_id = isset($_GET['doctor_id']) ? (int)validateInput($_GET['doctor_id']) : 0;
+$date = isset($_GET['date']) ? validateInput($_GET['date']) : '';
 
 // Validate required parameters
 if (!$doctor_id || empty($date)) {
@@ -32,25 +32,10 @@ if ($dateObj < $today) {
     sendResponse(false, "Cannot book appointments in the past");
 }
 
-// Check if the date is a Friday
-$dayOfWeek = $dateObj->format('N'); // 1 (Monday) to 7 (Sunday)
-if ($dayOfWeek == 5) { // 5 = Friday
-    sendResponse(false, "No appointments available on Fridays");
-}
-
-/**
- * Normalize slot labels so comparisons are case-insensitive, trimmed,
- * and resilient to format variations like 04:00 PM vs 4:00 PM.
- */
-function normalizeSlotLabel($slot) {
-    $normalized = strtolower(trim((string)$slot));
-    $timestamp = strtotime($normalized);
-
-    if ($timestamp !== false) {
-        return date('g:i a', $timestamp);
-    }
-
-    return $normalized;
+// Block Friday, Saturday, and Sunday
+$dayOfWeek = (int)date('N', strtotime($date)); // 1=Mon, 7=Sun
+if ($dayOfWeek >= 5) { // 5=Fri, 6=Sat, 7=Sun
+    sendResponse(false, "No appointments available on weekends or Fridays");
 }
 
 // Define all possible time slots
@@ -74,26 +59,22 @@ $stmt->bind_param("is", $doctor_id, $date);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Get booked times and convert to 12-hour format for comparison
+// Get booked times and convert to 12-hour format for exact comparison
 $bookedSlots = [];
 while ($row = $result->fetch_assoc()) {
     $time = $row['appointment_time'];
-    // Convert from 24-hour format (HH:MM:SS) to 12-hour format (HH:MM AM/PM)
-    $formattedTime = date('h:i A', strtotime($time));
-    $bookedSlots[] = normalizeSlotLabel($formattedTime);
+    $bookedSlots[] = trim(date('h:i A', strtotime($time)));
 }
 
 $stmt->close();
 $conn->close();
 
-// Remove booked slots from available slots using normalized comparison
-$normalizedBookedSlots = array_flip(array_map('normalizeSlotLabel', $bookedSlots));
-
+// Remove booked slots from available slots using trim + exact string matching
 $availableSlots = [];
 foreach ($allSlots as $slot) {
-    $normalizedSlot = normalizeSlotLabel($slot);
-    if (!isset($normalizedBookedSlots[$normalizedSlot])) {
-        $availableSlots[] = $slot;
+    $trimmedSlot = trim($slot);
+    if (!in_array($trimmedSlot, $bookedSlots, true)) {
+        $availableSlots[] = $trimmedSlot;
     }
 }
 

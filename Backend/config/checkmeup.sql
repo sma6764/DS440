@@ -1,385 +1,331 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Mar 23, 2026 at 11:35 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+CREATE DATABASE IF NOT EXISTS checkmeup;
+USE checkmeup;
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `checkmeup`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `appointments`
---
-
-CREATE TABLE `appointments` (
-  `id` int(11) NOT NULL,
-  `patient_id` int(11) NOT NULL,
-  `doctor_id` int(11) NOT NULL,
-  `branch_id` int(11) NOT NULL,
-  `appointment_date` date NOT NULL,
-  `appointment_time` time NOT NULL,
-  `status` enum('pending','confirmed','cancelled','completed') DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+-- ============================================
+-- Table: users
+-- Stores all users (patients, doctors, admins)
+-- ============================================
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    password_hash VARCHAR(255) NOT NULL,
+    date_of_birth DATE,
+    gender ENUM('Male', 'Female', 'Prefer not to say'),
+    role ENUM('patient', 'doctor', 'admin') NOT NULL,
+    insurance_company VARCHAR(100) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`id`, `patient_id`, `doctor_id`, `branch_id`, `appointment_date`, `appointment_time`, `status`, `created_at`) VALUES
-(1, 2, 1, 1, '2026-03-15', '10:00:00', 'confirmed', '2026-03-22 22:33:25'),
-(2, 2, 5, 1, '2026-02-10', '14:30:00', 'completed', '2026-03-22 22:33:25'),
-(3, 2, 7, 2, '2026-01-20', '11:00:00', 'completed', '2026-03-22 22:33:25');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `branches`
---
-
-CREATE TABLE `branches` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `city` varchar(50) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+-- ============================================
+-- Table: branches
+-- Stores clinic locations
+-- ============================================
+CREATE TABLE branches (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `branches`
---
-
-INSERT INTO `branches` (`id`, `name`, `address`, `city`, `phone`, `created_at`) VALUES
-(1, 'Check-me-up Philadelphia Main', '1500 Market Street, Philadelphia, PA', 'Philadelphia', '+1 (215) 555-0101', '2026-03-22 22:33:24'),
-(2, 'Check-me-up Pittsburgh Branch', '100 Fifth Avenue, Pittsburgh, PA', 'Pittsburgh', '+1 (412) 555-0202', '2026-03-22 22:33:24'),
-(3, 'Check-me-up Allentown Branch', '702 Hamilton Street, Allentown, PA', 'Allentown', '+1 (610) 555-0303', '2026-03-22 22:33:24');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `contact_messages`
---
-
-CREATE TABLE `contact_messages` (
-  `id` int(11) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `subject` varchar(200) NOT NULL,
-  `message` text NOT NULL,
-  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp()
+-- ============================================
+-- Table: specialists
+-- Stores specialist types
+-- ============================================
+CREATE TABLE specialists (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `doctors`
---
-
-CREATE TABLE `doctors` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `specialist_id` int(11) NOT NULL,
-  `branch_id` int(11) NOT NULL,
-  `bio` text DEFAULT NULL,
-  `rating` decimal(2,1) DEFAULT 0.0,
-  `is_active` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+-- ============================================
+-- Table: doctors
+-- Stores doctor profiles
+-- ============================================
+CREATE TABLE doctors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    specialist_id INT NOT NULL,
+    branch_id INT NOT NULL,
+    bio TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (specialist_id) REFERENCES specialists(id) ON DELETE RESTRICT,
+    FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `doctors`
---
-
-INSERT INTO `doctors` (`id`, `user_id`, `specialist_id`, `branch_id`, `bio`, `rating`, `is_active`, `created_at`) VALUES
-(1, 3, 1, 1, 'Experienced GP with 15+ years in family medicine. Specializes in preventive care and chronic disease management.', 4.8, 1, '2026-03-22 22:33:25'),
-(2, 4, 1, 2, 'Board-certified family physician dedicated to comprehensive patient care and wellness.', 4.7, 1, '2026-03-22 22:33:25'),
-(3, 5, 2, 1, 'Leading cardiologist with expertise in interventional cardiology and heart disease prevention.', 4.9, 1, '2026-03-22 22:33:25'),
-(4, 6, 2, 3, 'Specialized in non-invasive cardiology, echocardiography, and cardiac rehabilitation.', 4.6, 1, '2026-03-22 22:33:25'),
-(5, 7, 3, 2, 'Expert dermatologist focusing on medical and cosmetic dermatology with 12 years experience.', 4.7, 1, '2026-03-22 22:33:25'),
-(6, 8, 3, 1, 'Specialized in treating complex skin conditions, acne, and anti-aging treatments.', 4.8, 1, '2026-03-22 22:33:25'),
-(7, 9, 4, 3, 'Caring pediatrician with focus on child development, vaccinations, and pediatric care.', 4.9, 1, '2026-03-22 22:33:25'),
-(8, 10, 4, 2, 'Experienced in newborn care, childhood illnesses, and adolescent medicine.', 4.8, 1, '2026-03-22 22:33:25'),
-(9, 11, 5, 1, 'Neurologist specializing in headaches, epilepsy, and movement disorders.', 4.6, 1, '2026-03-22 22:33:25'),
-(10, 12, 5, 3, 'Expert in stroke management, neurodegenerative diseases, and sleep disorders.', 4.7, 1, '2026-03-22 22:33:25'),
-(11, 13, 6, 2, 'Orthopedic surgeon with expertise in sports injuries and joint replacement.', 4.8, 1, '2026-03-22 22:33:25'),
-(12, 14, 6, 1, 'Specialized in spine surgery, trauma care, and musculoskeletal disorders.', 4.9, 1, '2026-03-22 22:33:25');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `insurance_coverage`
---
-
-CREATE TABLE `insurance_coverage` (
-  `id` int(11) NOT NULL,
-  `specialist_id` int(11) NOT NULL,
-  `insurance_company` varchar(100) NOT NULL,
-  `coverage_percent` int(11) NOT NULL
+-- ============================================
+-- Table: insurance_coverage
+-- Stores which insurances each specialist accepts
+-- ============================================
+CREATE TABLE insurance_coverage (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    specialist_id INT NOT NULL,
+    insurance_company VARCHAR(100) NOT NULL,
+    coverage_percent INT NOT NULL,
+    FOREIGN KEY (specialist_id) REFERENCES specialists(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `insurance_coverage`
---
-
-INSERT INTO `insurance_coverage` (`id`, `specialist_id`, `insurance_company`, `coverage_percent`) VALUES
-(1, 1, 'Blue Cross Blue Shield', 85),
-(2, 1, 'Aetna', 80),
-(3, 1, 'UnitedHealthcare', 85),
-(4, 1, 'Cigna', 80),
-(5, 1, 'Humana', 75),
-(6, 1, 'Medicare', 100),
-(7, 1, 'Medicaid', 100),
-(8, 1, 'Kaiser Permanente', 85),
-(9, 1, 'Anthem', 80),
-(10, 1, 'Oscar Health', 75),
-(11, 2, 'Blue Cross Blue Shield', 80),
-(12, 2, 'Aetna', 75),
-(13, 2, 'UnitedHealthcare', 80),
-(14, 2, 'Cigna', 75),
-(15, 2, 'Humana', 70),
-(16, 2, 'Medicare', 100),
-(17, 2, 'Kaiser Permanente', 80),
-(18, 2, 'Anthem', 75),
-(19, 3, 'Blue Cross Blue Shield', 75),
-(20, 3, 'Aetna', 70),
-(21, 3, 'UnitedHealthcare', 75),
-(22, 3, 'Humana', 65),
-(23, 3, 'Medicaid', 80),
-(24, 3, 'Kaiser Permanente', 75),
-(25, 3, 'Oscar Health', 70),
-(26, 4, 'Blue Cross Blue Shield', 90),
-(27, 4, 'Aetna', 85),
-(28, 4, 'UnitedHealthcare', 90),
-(29, 4, 'Humana', 85),
-(30, 4, 'Medicare', 100),
-(31, 4, 'Medicaid', 100),
-(32, 4, 'Kaiser Permanente', 90),
-(33, 4, 'Oscar Health', 80),
-(34, 5, 'Blue Cross Blue Shield', 75),
-(35, 5, 'Aetna', 70),
-(36, 5, 'UnitedHealthcare', 80),
-(37, 5, 'Cigna', 75),
-(38, 5, 'Medicare', 100),
-(39, 5, 'Anthem', 70),
-(40, 6, 'Blue Cross Blue Shield', 80),
-(41, 6, 'Aetna', 75),
-(42, 6, 'UnitedHealthcare', 80),
-(43, 6, 'Cigna', 70),
-(44, 6, 'Medicare', 100),
-(45, 6, 'Anthem', 75);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `specialists`
---
-
-CREATE TABLE `specialists` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
+-- ============================================
+-- Table: appointments
+-- Stores all bookings
+-- ============================================
+CREATE TABLE appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    branch_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `specialists`
---
-
-INSERT INTO `specialists` (`id`, `name`) VALUES
-(1, 'General Practitioner'),
-(2, 'Cardiologist'),
-(3, 'Dermatologist'),
-(4, 'Pediatrician'),
-(5, 'Neurologist'),
-(6, 'Orthopedic');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users`
---
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `password_hash` varchar(255) NOT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `gender` enum('Male','Female','Prefer not to say') DEFAULT NULL,
-  `role` enum('patient','doctor','admin') NOT NULL,
-  `insurance_company` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+-- ============================================
+-- Table: contact_messages
+-- Stores messages from contact form
+-- ============================================
+CREATE TABLE contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    subject VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `users`
---
+-- ============================================
+-- Table: login_attempts
+-- Tracks failed login attempts for brute force protection
+-- ============================================
+CREATE TABLE login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `password_hash`, `date_of_birth`, `gender`, `role`, `insurance_company`, `created_at`) VALUES
-(1, 'System Administrator', 'admin@checkmeup.com', '+1 (215) 555-0100', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', '1985-01-15', 'Prefer not to say', 'admin', NULL, '2026-03-22 22:33:24'),
-(2, 'Sarah Thompson', 'sarah@checkmeup.com', '+1 (215) 555-0199', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1995-06-20', 'Female', 'patient', 'Blue Cross Blue Shield', '2026-03-22 22:33:25'),
-(3, 'Dr. James Mitchell', 'dr.mitchell@checkmeup.com', '+1 (215) 555-0301', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1980-03-12', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(4, 'Dr. Sarah Chen', 'dr.chen@checkmeup.com', '+1 (215) 555-0302', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1982-07-25', 'Female', 'doctor', NULL, '2026-03-22 22:33:25'),
-(5, 'Dr. Robert Williams', 'dr.williams@checkmeup.com', '+1 (215) 555-0303', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1978-11-08', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(6, 'Dr. Emily Davis', 'dr.davis@checkmeup.com', '+1 (215) 555-0304', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1985-04-15', 'Female', 'doctor', NULL, '2026-03-22 22:33:25'),
-(7, 'Dr. Michael Brown', 'dr.brown@checkmeup.com', '+1 (215) 555-0305', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1979-09-20', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(8, 'Dr. Jessica Taylor', 'dr.taylor@checkmeup.com', '+1 (215) 555-0306', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1987-02-10', 'Female', 'doctor', NULL, '2026-03-22 22:33:25'),
-(9, 'Dr. David Anderson', 'dr.anderson@checkmeup.com', '+1 (215) 555-0307', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1981-12-05', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(10, 'Dr. Ashley Johnson', 'dr.johnson@checkmeup.com', '+1 (215) 555-0308', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1986-08-18', 'Female', 'doctor', NULL, '2026-03-22 22:33:25'),
-(11, 'Dr. Christopher Lee', 'dr.lee@checkmeup.com', '+1 (215) 555-0309', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1977-05-30', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(12, 'Dr. Amanda Wilson', 'dr.wilson@checkmeup.com', '+1 (215) 555-0310', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1984-10-22', 'Female', 'doctor', NULL, '2026-03-22 22:33:25'),
-(13, 'Dr. Daniel Martinez', 'dr.martinez@checkmeup.com', '+1 (215) 555-0311', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1983-01-14', 'Male', 'doctor', NULL, '2026-03-22 22:33:25'),
-(14, 'Dr. Stephanie Thomas', 'dr.thomas@checkmeup.com', '+1 (215) 555-0312', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1988-06-28', 'Female', 'doctor', NULL, '2026-03-22 22:33:25');
+-- ============================================
+-- SAMPLE DATA INSERTION
+-- ============================================
 
---
--- Indexes for dumped tables
---
+-- Insert Branches
+INSERT INTO branches (name, address, city, phone) VALUES
+('Check-me-up Philadelphia Main', '1500 Market Street, Philadelphia, PA', 'Philadelphia', '+1 (215) 555-0101'),
+('Check-me-up Pittsburgh Branch', '100 Fifth Avenue, Pittsburgh, PA', 'Pittsburgh', '+1 (412) 555-0202'),
+('Check-me-up Allentown Branch', '702 Hamilton Street, Allentown, PA', 'Allentown', '+1 (610) 555-0303');
 
---
--- Indexes for table `appointments`
---
-ALTER TABLE `appointments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `idx_appointments_patient` (`patient_id`),
-  ADD KEY `idx_appointments_doctor` (`doctor_id`),
-  ADD KEY `idx_appointments_date` (`appointment_date`),
-  ADD KEY `idx_appointments_status` (`status`);
+-- Insert Specialists
+INSERT INTO specialists (name) VALUES
+('General Practitioner'),
+('Cardiologist'),
+('Dermatologist'),
+('Pediatrician'),
+('Neurologist'),
+('Orthopedic');
 
---
--- Indexes for table `branches`
---
-ALTER TABLE `branches`
-  ADD PRIMARY KEY (`id`);
+-- Insert Insurance Coverage
+-- Based on US insurance providers with realistic coverage percentages
+INSERT INTO insurance_coverage (specialist_id, insurance_company, coverage_percent) VALUES
+-- General Practitioner (id: 1)
+(1, 'Blue Cross Blue Shield', 85),
+(1, 'Aetna', 80),
+(1, 'UnitedHealthcare', 85),
+(1, 'Cigna', 80),
+(1, 'Humana', 75),
+(1, 'Medicare', 100),
+(1, 'Medicaid', 100),
+(1, 'Kaiser Permanente', 85),
+(1, 'Anthem', 80),
+(1, 'Oscar Health', 75),
+-- Cardiologist (id: 2)
+(2, 'Blue Cross Blue Shield', 80),
+(2, 'Aetna', 75),
+(2, 'UnitedHealthcare', 80),
+(2, 'Cigna', 75),
+(2, 'Humana', 70),
+(2, 'Medicare', 100),
+(2, 'Kaiser Permanente', 80),
+(2, 'Anthem', 75),
+-- Dermatologist (id: 3)
+(3, 'Blue Cross Blue Shield', 75),
+(3, 'Aetna', 70),
+(3, 'UnitedHealthcare', 75),
+(3, 'Humana', 65),
+(3, 'Medicaid', 80),
+(3, 'Kaiser Permanente', 75),
+(3, 'Oscar Health', 70),
+-- Pediatrician (id: 4)
+(4, 'Blue Cross Blue Shield', 90),
+(4, 'Aetna', 85),
+(4, 'UnitedHealthcare', 90),
+(4, 'Humana', 85),
+(4, 'Medicare', 100),
+(4, 'Medicaid', 100),
+(4, 'Kaiser Permanente', 90),
+(4, 'Oscar Health', 80),
+-- Neurologist (id: 5)
+(5, 'Blue Cross Blue Shield', 75),
+(5, 'Aetna', 70),
+(5, 'UnitedHealthcare', 80),
+(5, 'Cigna', 75),
+(5, 'Medicare', 100),
+(5, 'Anthem', 70),
+-- Orthopedic (id: 6)
+(6, 'Blue Cross Blue Shield', 80),
+(6, 'Aetna', 75),
+(6, 'UnitedHealthcare', 80),
+(6, 'Cigna', 70),
+(6, 'Medicare', 100),
+(6, 'Anthem', 75);
 
---
--- Indexes for table `contact_messages`
---
-ALTER TABLE `contact_messages`
-  ADD PRIMARY KEY (`id`);
+-- ============================================
+-- INSERT ADMIN USERS (5 total)
+-- Password: Admin123 (hashed with bcrypt)
+-- ============================================
+INSERT INTO users (full_name, email, phone, password_hash, date_of_birth, gender, role, insurance_company) VALUES
+('Steven Collins', 'steven.collins@checkmeup.com', '+1 (215) 555-0301', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', NULL, 'Male', 'admin', NULL),
+('Nancy Edwards', 'nancy.edwards@checkmeup.com', '+1 (412) 555-0302', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', NULL, 'Female', 'admin', NULL),
+('George Murphy', 'george.murphy@checkmeup.com', '+1 (610) 555-0303', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', NULL, 'Male', 'admin', NULL),
+('Dorothy Bell', 'dorothy.bell@checkmeup.com', '+1 (215) 555-0304', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', NULL, 'Female', 'admin', NULL),
+('Kenneth Howard', 'kenneth.howard@checkmeup.com', '+1 (412) 555-0305', '$2y$12$Nw3znp1Td3GWyTk9gLLhGuqAaTFyxCN0FQsCcuMeCF.EaOL0bHcFK', NULL, 'Male', 'admin', NULL);
 
---
--- Indexes for table `doctors`
---
-ALTER TABLE `doctors`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `idx_doctors_specialist` (`specialist_id`),
-  ADD KEY `idx_doctors_branch` (`branch_id`),
-  ADD KEY `idx_doctors_active` (`is_active`);
+-- ============================================
+-- INSERT PATIENTS (25 total)
+-- Password: Patient123 (hashed with bcrypt)
+-- ============================================
+INSERT INTO users (full_name, email, phone, password_hash, date_of_birth, gender, role, insurance_company) VALUES
+('James Carter', 'james.carter@gmail.com', '+1 (215) 555-0101', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1990-03-14', 'Male', 'patient', 'Blue Cross Blue Shield'),
+('Emily Rodriguez', 'emily.rodriguez@gmail.com', '+1 (215) 555-0102', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1985-07-22', 'Female', 'patient', 'Aetna'),
+('Michael Thompson', 'michael.thompson@gmail.com', '+1 (412) 555-0103', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1992-11-08', 'Male', 'patient', 'UnitedHealthcare'),
+('Ashley Williams', 'ashley.williams@gmail.com', '+1 (610) 555-0104', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1988-05-30', 'Female', 'patient', 'Cigna'),
+('David Martinez', 'david.martinez@gmail.com', '+1 (215) 555-0105', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1995-01-17', 'Male', 'patient', 'Humana'),
+('Jessica Brown', 'jessica.brown@gmail.com', '+1 (412) 555-0106', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1991-09-25', 'Female', 'patient', 'Medicare'),
+('Christopher Davis', 'chris.davis@gmail.com', '+1 (610) 555-0107', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1983-12-03', 'Male', 'patient', 'Medicaid'),
+('Amanda Wilson', 'amanda.wilson@gmail.com', '+1 (215) 555-0108', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1997-04-19', 'Female', 'patient', 'Kaiser Permanente'),
+('Daniel Anderson', 'daniel.anderson@gmail.com', '+1 (412) 555-0109', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1989-08-11', 'Male', 'patient', 'Anthem'),
+('Stephanie Taylor', 'stephanie.taylor@gmail.com', '+1 (610) 555-0110', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1994-02-28', 'Female', 'patient', 'Oscar Health'),
+('Kevin Thomas', 'kevin.thomas@gmail.com', '+1 (215) 555-0111', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1986-06-15', 'Male', 'patient', 'Blue Cross Blue Shield'),
+('Rachel Jackson', 'rachel.jackson@gmail.com', '+1 (412) 555-0112', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1993-10-07', 'Female', 'patient', 'Aetna'),
+('Brandon White', 'brandon.white@gmail.com', '+1 (610) 555-0113', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1990-03-22', 'Male', 'patient', 'UnitedHealthcare'),
+('Melissa Harris', 'melissa.harris@gmail.com', '+1 (215) 555-0114', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1987-07-14', 'Female', 'patient', 'Cigna'),
+('Tyler Clark', 'tyler.clark@gmail.com', '+1 (412) 555-0115', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1996-11-30', 'Male', 'patient', 'Humana'),
+('Lauren Lewis', 'lauren.lewis@gmail.com', '+1 (610) 555-0116', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1984-01-09', 'Female', 'patient', 'Medicare'),
+('Nathan Robinson', 'nathan.robinson@gmail.com', '+1 (215) 555-0117', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1991-05-18', 'Male', 'patient', 'Medicaid'),
+('Brittany Walker', 'brittany.walker@gmail.com', '+1 (412) 555-0118', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1988-09-03', 'Female', 'patient', 'Kaiser Permanente'),
+('Justin Hall', 'justin.hall@gmail.com', '+1 (610) 555-0119', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1995-02-24', 'Male', 'patient', 'Anthem'),
+('Samantha Allen', 'samantha.allen@gmail.com', '+1 (215) 555-0120', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1992-06-11', 'Female', 'patient', 'Oscar Health'),
+('Ryan Young', 'ryan.young@gmail.com', '+1 (412) 555-0121', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1986-10-27', 'Male', 'patient', 'Blue Cross Blue Shield'),
+('Kayla King', 'kayla.king@gmail.com', '+1 (610) 555-0122', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1993-03-16', 'Female', 'patient', 'Aetna'),
+('Austin Scott', 'austin.scott@gmail.com', '+1 (215) 555-0123', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1989-07-05', 'Male', 'patient', 'UnitedHealthcare'),
+('Megan Green', 'megan.green@gmail.com', '+1 (412) 555-0124', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1997-12-21', 'Female', 'patient', 'Cigna'),
+('Zachary Baker', 'zachary.baker@gmail.com', '+1 (610) 555-0125', '$2y$12$IIE7guvllK1IC8sgeE6KtODoqjH5sHcagvwCp.7dg5Wq6voh0QPEC', '1984-04-08', 'Male', 'patient', 'Humana');
 
---
--- Indexes for table `insurance_coverage`
---
-ALTER TABLE `insurance_coverage`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_insurance_specialist` (`specialist_id`),
-  ADD KEY `idx_insurance_company` (`insurance_company`);
+-- ============================================
+-- INSERT DOCTOR USERS (10 total)
+-- Password: Doctor123 (hashed with bcrypt)
+-- ============================================
+INSERT INTO users (full_name, email, phone, password_hash, date_of_birth, gender, role, insurance_company) VALUES
+('Dr. Robert Mitchell', 'robert.mitchell@checkmeup.com', '+1 (215) 555-0201', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1975-04-12', 'Male', 'doctor', NULL),
+('Dr. Jennifer Chen', 'jennifer.chen@checkmeup.com', '+1 (215) 555-0202', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1980-08-23', 'Female', 'doctor', NULL),
+('Dr. William Hayes', 'william.hayes@checkmeup.com', '+1 (412) 555-0203', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1972-11-05', 'Male', 'doctor', NULL),
+('Dr. Patricia Nguyen', 'patricia.nguyen@checkmeup.com', '+1 (412) 555-0204', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1978-02-17', 'Female', 'doctor', NULL),
+('Dr. Charles Morgan', 'charles.morgan@checkmeup.com', '+1 (610) 555-0205', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1976-06-30', 'Male', 'doctor', NULL),
+('Dr. Sandra Phillips', 'sandra.phillips@checkmeup.com', '+1 (610) 555-0206', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1983-09-14', 'Female', 'doctor', NULL),
+('Dr. Thomas Rivera', 'thomas.rivera@checkmeup.com', '+1 (215) 555-0207', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1970-01-28', 'Male', 'doctor', NULL),
+('Dr. Linda Cooper', 'linda.cooper@checkmeup.com', '+1 (412) 555-0208', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1981-05-19', 'Female', 'doctor', NULL),
+('Dr. Mark Richardson', 'mark.richardson@checkmeup.com', '+1 (610) 555-0209', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1977-10-07', 'Male', 'doctor', NULL),
+('Dr. Barbara Turner', 'barbara.turner@checkmeup.com', '+1 (215) 555-0210', '$2y$12$JxroZPn4InyzP6k/Qdgwk.WjbutGrABSvGXeOVmSQQOweFDD1dgP6', '1979-03-25', 'Female', 'doctor', NULL);
 
---
--- Indexes for table `specialists`
---
-ALTER TABLE `specialists`
-  ADD PRIMARY KEY (`id`);
+-- ============================================
+-- INSERT DOCTOR PROFILES (10 total)
+-- Linking users to specialists and branches
+-- ============================================
+INSERT INTO doctors (user_id, specialist_id, branch_id, bio, is_active) VALUES
+-- Dr. Robert Mitchell - General Practitioner (user_id: 31, specialist_id: 1)
+(31, 1, 1, 'Experienced General Practitioner with over 20 years of practice in Pennsylvania.', TRUE),
+-- Dr. Jennifer Chen - Cardiologist (user_id: 32, specialist_id: 2)
+(32, 2, 1, 'Experienced Cardiologist with over 18 years of practice in Pennsylvania.', TRUE),
+-- Dr. William Hayes - Dermatologist (user_id: 33, specialist_id: 3)
+(33, 3, 2, 'Experienced Dermatologist with over 25 years of practice in Pennsylvania.', TRUE),
+-- Dr. Patricia Nguyen - Pediatrician (user_id: 34, specialist_id: 4)
+(34, 4, 2, 'Experienced Pediatrician with over 15 years of practice in Pennsylvania.', TRUE),
+-- Dr. Charles Morgan - Neurologist (user_id: 35, specialist_id: 5)
+(35, 5, 3, 'Experienced Neurologist with over 18 years of practice in Pennsylvania.', TRUE),
+-- Dr. Sandra Phillips - Orthopedic (user_id: 36, specialist_id: 6)
+(36, 6, 3, 'Experienced Orthopedic specialist with over 16 years of practice in Pennsylvania.', TRUE),
+-- Dr. Thomas Rivera - Cardiologist (user_id: 37, specialist_id: 2)
+(37, 2, 1, 'Experienced Cardiologist with over 28 years of practice in Pennsylvania.', TRUE),
+-- Dr. Linda Cooper - General Practitioner (user_id: 38, specialist_id: 1)
+(38, 1, 2, 'Experienced General Practitioner with over 14 years of practice in Pennsylvania.', TRUE),
+-- Dr. Mark Richardson - Neurologist (user_id: 39, specialist_id: 5)
+(39, 5, 1, 'Experienced Neurologist with over 17 years of practice in Pennsylvania.', TRUE),
+-- Dr. Barbara Turner - Pediatrician (user_id: 40, specialist_id: 4)
+(40, 4, 3, 'Experienced Pediatrician with over 12 years of practice in Pennsylvania.', TRUE);
 
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `idx_users_email` (`email`),
-  ADD KEY `idx_users_role` (`role`);
+-- ============================================
+-- INSERT SAMPLE APPOINTMENTS (15 total)
+-- Mixed statuses: pending, confirmed, completed, cancelled
+-- ============================================
+INSERT INTO appointments (patient_id, doctor_id, branch_id, appointment_date, appointment_time, status) VALUES
+-- James Carter (patient_id: 6)
+(6, 1, 1, '2026-04-15', '10:00:00', 'confirmed'),
+(6, 2, 1, '2026-03-10', '14:30:00', 'completed'),
 
---
--- AUTO_INCREMENT for dumped tables
---
+-- Emily Rodriguez (patient_id: 7)
+(7, 3, 2, '2026-05-01', '09:00:00', 'pending'),
+(7, 1, 1, '2026-02-15', '11:00:00', 'completed'),
 
---
--- AUTO_INCREMENT for table `appointments`
---
-ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+-- Michael Thompson (patient_id: 8)
+(8, 4, 2, '2026-04-20', '13:00:00', 'confirmed'),
+(8, 5, 3, '2026-01-30', '15:00:00', 'completed'),
 
---
--- AUTO_INCREMENT for table `branches`
---
-ALTER TABLE `branches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+-- Ashley Williams (patient_id: 9)
+(9, 6, 3, '2026-04-25', '10:30:00', 'pending'),
+(9, 3, 2, '2026-03-05', '14:00:00', 'cancelled'),
 
---
--- AUTO_INCREMENT for table `contact_messages`
---
-ALTER TABLE `contact_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+-- David Martinez (patient_id: 10)
+(10, 7, 1, '2026-05-10', '11:00:00', 'confirmed'),
+(10, 4, 2, '2026-02-20', '09:30:00', 'completed'),
 
---
--- AUTO_INCREMENT for table `doctors`
---
-ALTER TABLE `doctors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+-- Jessica Brown (patient_id: 11)
+(11, 8, 2, '2026-04-18', '15:00:00', 'pending'),
+(11, 2, 1, '2026-01-25', '10:00:00', 'completed'),
 
---
--- AUTO_INCREMENT for table `insurance_coverage`
---
-ALTER TABLE `insurance_coverage`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+-- Christopher Davis (patient_id: 12)
+(12, 9, 1, '2026-05-05', '13:30:00', 'confirmed'),
+(12, 6, 3, '2026-03-15', '11:30:00', 'completed'),
 
---
--- AUTO_INCREMENT for table `specialists`
---
-ALTER TABLE `specialists`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+-- Amanda Wilson (patient_id: 13)
+(13, 1, 1, '2026-04-12', '09:00:00', 'pending');
 
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+-- ============================================
+-- Create Indexes for Performance
+-- ============================================
 
---
--- Constraints for dumped tables
---
+-- Index on users table
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
 
---
--- Constraints for table `appointments`
---
-ALTER TABLE `appointments`
-  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointments_ibfk_3` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE;
+-- Index on appointments table
+CREATE INDEX idx_appointments_patient ON appointments(patient_id);
+CREATE INDEX idx_appointments_doctor ON appointments(doctor_id);
+CREATE INDEX idx_appointments_date ON appointments(appointment_date);
+CREATE INDEX idx_appointments_status ON appointments(status);
 
---
--- Constraints for table `doctors`
---
-ALTER TABLE `doctors`
-  ADD CONSTRAINT `doctors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `doctors_ibfk_2` FOREIGN KEY (`specialist_id`) REFERENCES `specialists` (`id`),
-  ADD CONSTRAINT `doctors_ibfk_3` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+-- Index on doctors table
+CREATE INDEX idx_doctors_specialist ON doctors(specialist_id);
+CREATE INDEX idx_doctors_branch ON doctors(branch_id);
+CREATE INDEX idx_doctors_active ON doctors(is_active);
 
---
--- Constraints for table `insurance_coverage`
---
-ALTER TABLE `insurance_coverage`
-  ADD CONSTRAINT `insurance_coverage_ibfk_1` FOREIGN KEY (`specialist_id`) REFERENCES `specialists` (`id`) ON DELETE CASCADE;
-COMMIT;
+-- Index on insurance_coverage table
+CREATE INDEX idx_insurance_specialist ON insurance_coverage(specialist_id);
+CREATE INDEX idx_insurance_company ON insurance_coverage(insurance_company);
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
