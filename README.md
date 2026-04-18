@@ -48,3 +48,51 @@ The platform supports multiple clinic branches, shows insurance coverage and pri
 DS440 — Capstone Project | Group 12
  
 ---
+
+## Getting Started — Run Locally
+
+### Requirements
+
+- [XAMPP](https://www.apachefriends.org/download.html) — includes Apache, PHP, and MySQL
+
+---
+
+### Step 1 — Install XAMPP
+
+1. Download and install XAMPP from https://www.apachefriends.org/download.html
+2. Open the **XAMPP Control Panel**
+3. Start **Apache** and **MySQL**
+
+---
+
+### Step 2 — Clone the Repository OR download the zip file
+
+```bash
+git clone https://github.com/YOUR_USERNAME/checkmeup.git
+```
+
+Move the cloned folder (or zipped folder) into your XAMPP `htdocs` directory:
+
+- **Windows:** `C:\xampp\htdocs\checkmeup`
+- **Mac:** `/Applications/XAMPP/htdocs/checkmeup`
+
+---
+
+### Step 3 — Set Up the Database
+
+1. Open your browser and go to `http://localhost/phpmyadmin`
+2. Click **New** on the left sidebar
+3. Create a database named `checkmeup`
+4. Select the `checkmeup` database
+5. Click the **Import** tab
+6. Click **Choose File** and select `checkmeup.sql` from the `backend/config`
+7. Click **Go**
+
+The database will be created with all tables and seed data.
+
+---
+
+### Step 4 — run xampp and open local web
+1. Search for xampp and open application
+2. enable the apache server and database
+3. once on, in your browser open http://localhost/check-me-up/frontend/
