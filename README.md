@@ -96,3 +96,19 @@ The database will be created with all tables and seed data.
 1. Search for xampp and open application
 2. enable the apache server and database
 3. once on, in your browser open http://localhost/DS440-main/Frontend/pages/
+
+---
+
+### logins and passes for users:
+
+Patient:
+james.carter@gmail.com
+Patient123
+
+Doctor:
+robert.mitchell@checkmeup.com
+Doctor123
+
+Admin:
+steven.collins@checkmeup.com
+Admin123
