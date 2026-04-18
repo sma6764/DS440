@@ -73,8 +73,8 @@ git clone https://github.com/YOUR_USERNAME/checkmeup.git
 
 Move the cloned folder (or zipped folder) into your XAMPP `htdocs` directory:
 
-- **Windows:** `C:\xampp\htdocs\checkmeup`
-- **Mac:** `/Applications/XAMPP/htdocs/checkmeup`
+- **Windows:** `C:\xampp\htdocs\`
+- **Mac:** `/Applications/XAMPP/htdocs/`
 
 ---
 
@@ -95,4 +95,4 @@ The database will be created with all tables and seed data.
 ### Step 4 — run xampp and open local web
 1. Search for xampp and open application
 2. enable the apache server and database
-3. once on, in your browser open http://localhost/check-me-up/frontend/
+3. once on, in your browser open http://localhost/DS440-main/Frontend/pages/
