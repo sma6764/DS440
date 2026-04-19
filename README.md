@@ -75,7 +75,7 @@ Move the cloned folder (or zipped folder) into your XAMPP `htdocs` directory:
 
 - **Windows:** `C:\xampp\htdocs\`
 - **Mac:** `/Applications/XAMPP/htdocs/`
-- Rename the folder to check-me-up
+- Rename the folder to "check-me-up"
 
 ---
 
